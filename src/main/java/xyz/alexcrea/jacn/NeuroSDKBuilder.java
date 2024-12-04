@@ -85,6 +85,8 @@ public class NeuroSDKBuilder {
 
     /**
      * Set the actions that will be registered if the websocket connected successfully.
+     * <p>
+     * please note: There is no guaranty on what thread the action result is called by.
      * @param actions the list of actions to get registered
      */
     public void setActionsOnConnect(@NotNull List<Action> actions) {
@@ -93,6 +95,8 @@ public class NeuroSDKBuilder {
 
     /**
      * Set the actions that will be registered if the websocket connected successfully.
+     * <p>
+     * please note: There is no guaranty on what thread the action result is called by.
      * @param actions the list of actions to get registered
      */
     public void setActionsOnConnect(@NotNull Action... actions) {
@@ -101,6 +105,8 @@ public class NeuroSDKBuilder {
 
     /**
      * Add action to be registered if the websocket get connected successfully
+     * <p>
+     * please note: There is no guaranty on what thread the action result is called by.
      * @param actions the list of actions to get registered
      */
     public void addActionsOnConnect(@NotNull List<Action> actions) {
@@ -109,6 +115,8 @@ public class NeuroSDKBuilder {
 
     /**
      * Add action to be registered if the websocket get connected successfully
+     * <p>
+     * please note: There is no guaranty on what thread the action result is called by.
      * @param actions the list of actions to get registered
      */
     public void addActionsOnConnect(@NotNull Action... actions) {
