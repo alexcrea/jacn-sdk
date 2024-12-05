@@ -1,6 +1,5 @@
 package xyz.alexcrea.jacn;
 
-import com.google.gson.Gson;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +18,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @SuppressWarnings({"unused"})
 public class NeuroSDK {
-
-    private static final Gson gson = new Gson();
 
     private final @NotNull String gameName;
 
@@ -53,6 +50,15 @@ public class NeuroSDK {
                 this::onConnect, this::onClose, this::onConnectError);
 
         this.websocket.connect();
+    }
+
+    /**
+     * Get the game name
+     *
+     * @return the game name
+     */
+    public @NotNull String getGameName() {
+        return gameName;
     }
 
     private void onConnect(@NotNull ServerHandshake handshake) {
@@ -161,25 +167,6 @@ public class NeuroSDK {
         return getActions(List.of(names));
     }
 
-    private boolean sendCommand(@NotNull String command, @Nullable Map<String, Object> data, boolean bypassConnected) {
-        if (!bypassConnected && !NeuroSDKState.CONNECTED.equals(this.state)) return false;
-
-        HashMap<String, Object> toSendMap = new HashMap<>();
-        toSendMap.put("command", command);
-        toSendMap.put("game", this.gameName);
-        if (data != null) {
-            toSendMap.put("data", data);
-        }
-
-        String toSend = gson.toJson(toSendMap);
-        websocket.send(toSend);
-        return true;
-    }
-
-    private boolean sendCommand(@NotNull String command, @Nullable Map<String, Object> data) {
-        return sendCommand(command, data, false);
-    }
-
     /**
      * Send a startup command.
      * clearing every action and registering all the startup actions
@@ -191,7 +178,7 @@ public class NeuroSDK {
         // Clear previous actions if any
         this.registeredActions.clear();
 
-        if (!sendCommand("startup", null, true)) {
+        if (!websocket.sendCommand("startup", null, true)) {
             System.err.println("Could not send startup command");
             this.state = NeuroSDKState.ERROR;
 
@@ -228,7 +215,7 @@ public class NeuroSDK {
     public boolean sendContext(@NotNull String message, boolean silent) {
         if (!NeuroSDKState.CONNECTED.equals(this.state)) return false;
 
-        return sendCommand("context", Map.of(
+        return websocket.sendCommand("context", Map.of(
                 "message", message,
                 "silent", silent
         ));
@@ -253,7 +240,7 @@ public class NeuroSDK {
         }
         registerLock.readLock().unlock();
 
-        return sendCommand("actions/register", Map.of("actions", actions));
+        return websocket.sendCommand("actions/register", Map.of("actions", actions));
     }
 
     /**
@@ -287,7 +274,7 @@ public class NeuroSDK {
         registerLock.readLock().unlock();
 
         List<String> actionNames = new ArrayList<>(registeredActions.keySet());
-        return sendCommand("actions/unregister", Map.of("action_names", actionNames));
+        return websocket.sendCommand("actions/unregister", Map.of("action_names", actionNames));
     }
 
     /**
@@ -329,7 +316,7 @@ public class NeuroSDK {
         toSend.put("ephemeral_context", ephemeral);
         toSend.put("action_names", actionNames);
 
-        return sendCommand("actions/force", Map.of("actions", toSend));
+        return websocket.sendCommand("actions/force", Map.of("actions", toSend));
     }
 
     /**

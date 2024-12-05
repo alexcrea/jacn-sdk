@@ -51,7 +51,8 @@ public class NeuroSDKBuilder {
                         "(" + serverHandshake.getHttpStatus() + ") " + serverHandshake.getHttpStatusMessage());
             }
         };
-        this.onClose = string -> {};
+        this.onClose = string -> {
+        };
         this.onError = error -> {
             new WebsocketException("Got error while running the websocket: ", error).printStackTrace();
         };

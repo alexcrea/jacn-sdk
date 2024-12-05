@@ -1,17 +1,23 @@
 package xyz.alexcrea.jacn;
 
+import com.google.gson.Gson;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.ConnectException;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
  * The websocket for the neuro sdk.
  */
 public class NeuroWebsocket extends WebSocketClient {
+
+    private static final Gson gson = new Gson();
 
     private final @NotNull NeuroSDK parent;
 
@@ -68,4 +74,23 @@ public class NeuroWebsocket extends WebSocketClient {
 
         onWebsocketError.accept(e);
     }
+
+    public boolean sendCommand(@NotNull String command, @Nullable Map<String, Object> data, boolean bypassConnected) {
+        if (!bypassConnected && !NeuroSDKState.CONNECTED.equals(this.parent.getState())) return false;
+
+        HashMap<String, Object> toSendMap = new HashMap<>();
+        toSendMap.put("command", command);
+        toSendMap.put("game", this.parent.getGameName());
+        if (data != null) {
+            toSendMap.put("data", data);
+        }
+
+        send(gson.toJson(toSendMap));
+        return true;
+    }
+
+    public boolean sendCommand(@NotNull String command, @Nullable Map<String, Object> data) {
+        return sendCommand(command, data, false);
+    }
+
 }
