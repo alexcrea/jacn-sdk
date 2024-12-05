@@ -1,5 +1,6 @@
 package xyz.alexcrea.jacn;
 
+import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * The instance used to register actions
+ * The instance used to communicate with the Neuro SDK API
  */
 @SuppressWarnings({"unused"})
 public class NeuroSDK {
@@ -31,7 +32,7 @@ public class NeuroSDK {
     private final HashMap<String, Action> registeredActions;
 
     /**
-     * Create a neuro sdk via a builder
+     * Create a Neuro sdk via a builder
      *
      * @param builder the builder to base from
      */
@@ -67,9 +68,9 @@ public class NeuroSDK {
             return;
         }
         if (!startup()) {
-            System.err.println("Could not startup ");
+            System.err.println("Could not startup the websocket");
 
-            websocket.close(1, "Could not startup the ");
+            websocket.close(CloseFrame.PROTOCOL_ERROR, "Could not startup the websocket");
         }
     }
 
@@ -83,9 +84,9 @@ public class NeuroSDK {
     }
 
     /**
-     * Get the current state of the neuro sdk
+     * Get the current state of the Neuro sdk
      *
-     * @return the neuro sdk state
+     * @return the Neuro sdk state
      */
     public @NotNull NeuroSDKState getState() {
         return state;
@@ -202,11 +203,11 @@ public class NeuroSDK {
     }
 
     /**
-     * This function is used to let neuro know about something happening in game
+     * This function is used to let Neuro know about something happening in game
      *
      * @param message A plaintext message that describe what is happening in the game.
-     *                This information will be directly received by neuro
-     * @param silent  If true, the message will be added to neuro context without prompting her to respond to it.
+     *                This information will be directly received by Neuro
+     * @param silent  If true, the message will be added to Neuro context without prompting her to respond to it.
      *                <p>
      *                If false, Neuro will respond to the message directly,
      *                unless she is busy talking about someone else or to chat

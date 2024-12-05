@@ -1,7 +1,7 @@
 package xyz.alexcrea.jacn;
 
 /**
- * Current state of the neuro sdk
+ * Current state of the Neuro sdk
  */
 public enum NeuroSDKState {
 

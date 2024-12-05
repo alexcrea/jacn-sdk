@@ -1,15 +1,23 @@
 package xyz.alexcrea.jacn;
 
+import com.google.gson.Gson;
 import xyz.alexcrea.jacn.action.Action;
+
+import java.util.HashMap;
 
 // Only temporary for manual test.
 // Test will get on test folder when randy is published & CI-able
 public class Main {
 
+    private static final Gson gson = new Gson();
+
     public static void main(String[] args) {
         Action test = new Action("test", "a", result -> {
             System.out.println("temp");
         });
+
+        HashMap<?, ?> temp = gson.fromJson("{\"test\": {\"test\": \"test\"}}", HashMap.class);
+        System.out.println(temp.get("test").getClass());
 
         NeuroSDK SDK = new NeuroSDKBuilder("Test 42")
                 .addActionsOnConnect(test)

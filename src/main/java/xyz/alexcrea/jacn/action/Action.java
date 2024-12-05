@@ -16,7 +16,7 @@ public class Action {
 
     private final @NotNull String name;
     private final @NotNull String description;
-    private @NotNull Consumer<ActionResult> onResult;
+    private @NotNull Consumer<ActionRequest> onResult;
 
     private @NotNull Consumer<ActionFailed> onFailed;
 
@@ -39,7 +39,7 @@ public class Action {
     public Action(@NotNull String name,
                   @NotNull String description,
                   @Nullable String data,
-                  @NotNull Consumer<ActionResult> onResult) {
+                  @NotNull Consumer<ActionRequest> onResult) {
         this.name = name.toLowerCase();
         this.description = description;
         this.data = data;
@@ -63,7 +63,7 @@ public class Action {
      */
     public Action(@NotNull String name,
                   @NotNull String description,
-                  @NotNull Consumer<ActionResult> onResult) {
+                  @NotNull Consumer<ActionRequest> onResult) {
         this(name, description, null, onResult);
     }
 
@@ -90,7 +90,7 @@ public class Action {
      *
      * @return the action executed on result
      */
-    public @NotNull Consumer<ActionResult> getOnResult() {
+    public @NotNull Consumer<ActionRequest> getOnResult() {
         return onResult;
     }
 
@@ -101,7 +101,7 @@ public class Action {
      * @return this
      */
     @NotNull
-    public Action setOnResult(@NotNull Consumer<ActionResult> onResult) {
+    public Action setOnResult(@NotNull Consumer<ActionRequest> onResult) {
         this.onResult = onResult;
         return this;
     }

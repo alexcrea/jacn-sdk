@@ -1,10 +1,15 @@
 package xyz.alexcrea.jacn;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.alexcrea.jacn.action.Action;
+import xyz.alexcrea.jacn.action.ActionRequest;
+import xyz.alexcrea.jacn.action.ActionResult;
 
 import java.net.ConnectException;
 import java.net.URI;
@@ -13,7 +18,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * The websocket for the neuro sdk.
+ * The websocket for the Neuro sdk api
  */
 public class NeuroWebsocket extends WebSocketClient {
 
@@ -54,9 +59,143 @@ public class NeuroWebsocket extends WebSocketClient {
         onWebsocketOpen.accept(serverHandshake);
     }
 
+    private void executeActionRequest(@NotNull ActionRequest request) {
+        // TODO
+    }
+
     @Override
     public void onMessage(String message) {
-        //TODO important part lol
+        try {
+            HashMap<?, ?> map = gson.fromJson(message, HashMap.class);
+            if (map == null) {
+                sendInvalidFeedbackUnknownID(message, "Could not parse json: " +
+                        "\nmessage: " + message);
+                return;
+            }
+
+            Object commandObj = map.get("command");
+            if (commandObj == null) {
+                sendInvalidFeedbackUnknownID(message, "Could not find command: " +
+                        "\nmessage: " + message);
+                return;
+            }
+
+            String command = commandObj.toString();
+            if (!command.contentEquals("action")) {
+                sendInvalidFeedbackUnknownID(message, "Invalid command. only accept action command." +
+                        "\nmessage: " + message);
+                return;
+            }
+
+            Object dataObj = map.get("data");
+            if (!(dataObj instanceof Map<?, ?> data)) {
+                sendInvalidFeedbackUnknownID(message, "Could not find command data" +
+                        "\nmessage: " + message);
+                return;
+            }
+
+            ActionRequest request = findRequest(data, message);
+            if(request == null) return;
+
+            executeActionRequest(request);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+
+            sendInvalidFeedbackUnknownID(message, "Could not parse json. it is malformed: " + e.getMessage() +
+                    "\nmessage: " + message);
+        }
+    }
+
+    private void sendInvalidFeedbackUnknownID(@NotNull String message, String errorToSend) {
+        String id = findID(message);
+        if (id == null) return;
+        sendInvalidFeedbackKnownID(id, errorToSend);
+    }
+
+    private void sendInvalidFeedbackKnownID(@NotNull String id, String errorToSend) {
+        ActionResult failedResult = new ActionResult(id, false, errorToSend);
+
+        if (!sendResult(failedResult)) {
+            System.err.println("Could not send result feedback: " +
+                    "\n" + errorToSend);
+            close(CloseFrame.PROTOCOL_ERROR, "Could not send result feedback: " +
+                    "\n" + errorToSend);
+        }
+    }
+
+    @Nullable
+    private ActionRequest findRequest(@NotNull Map<?, ?> map, @NotNull String message) {
+        Object idObj = map.get("id");
+        if (idObj == null) {
+            sendInvalidFeedbackUnknownID(message, "Could not find the id field on the message" +
+                    "\nmessage: " + message);
+            return null;
+        }
+        String id = idObj.toString();
+
+        Object nameObj = map.get("name");
+        if (nameObj == null) {
+            sendInvalidFeedbackKnownID(id, "Could not find the action name on the message" +
+                    "\nmessage: " + message);
+            return null;
+        }
+        String name = nameObj.toString();
+
+        // Try to find the action related to the message
+        Action action = parent.getAction(name);
+        if (action == null) {
+            // This is kind of complicated:
+            // We know we can't find the action (it is not registered on our side.)
+            // But we can't report as failure as the Neuro side would retry
+            // So we report a success with no message just in case
+            sendResult(new ActionResult(id, true, ""));
+            return null;
+        }
+
+        // TODO json schema data (json schema response. nullable)
+        Object data = map.get("data");
+        String datatemp = data == null ? null : data.toString();
+
+
+        return new ActionRequest(action, name, datatemp);
+    }
+
+    @Nullable
+    private String findID(String message) {
+        // Try to find the id in a very poor way
+        int startIndex = message.indexOf("\"id\":");
+        if (startIndex == -1) {
+            System.err.println("Did not find id field" +
+                    "\nmessage: " + message);
+            close(CloseFrame.PROTOCOL_ERROR, "Did not find id field");
+            return null;
+        }
+        startIndex = message.indexOf("\"", startIndex + 5) + 1;
+        if (startIndex == 0) {
+            System.err.println("Did not find start of id field" +
+                    "\nmessage: " + message);
+            close(CloseFrame.PROTOCOL_ERROR, "Did not find start of id field");
+            return null;
+        }
+
+        int badEndIndex = message.indexOf("\"", startIndex);
+        if (badEndIndex == -1) {
+            System.err.println("Did not find end of id field" +
+                    "\nmessage: " + message);
+            close(CloseFrame.PROTOCOL_ERROR, "Did not find end of id field");
+            return null;
+        }
+
+        return message.substring(startIndex, badEndIndex);
+    }
+
+    public boolean sendResult(@NotNull ActionResult result) {
+        Map<String, Object> toSend = new HashMap<>();
+        toSend.put("id", result.id());
+        toSend.put("success", result.success());
+        if (result.message() != null) toSend.put("message", result.message());
+
+        return sendCommand("action/result", toSend);
     }
 
     @Override

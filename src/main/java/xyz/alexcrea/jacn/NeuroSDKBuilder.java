@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Create a new builder to create a neuro sdk instance
+ * Create a new builder to create a Neuro sdk instance
  */
 @SuppressWarnings({"unused"})
 public class NeuroSDKBuilder {
@@ -265,10 +265,10 @@ public class NeuroSDKBuilder {
     }
 
     /**
-     * Create and open a neuro sdk with the builder properties.
+     * Create and open a Neuro sdk with the builder properties.
      * Will also try to connect to it.
      *
-     * @return the neuro sdk instance with websocket opening.
+     * @return the Neuro sdk instance with websocket opening.
      */
     @NotNull
     public NeuroSDK build() {
