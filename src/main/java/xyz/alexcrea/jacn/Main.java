@@ -14,6 +14,7 @@ public class Main {
     public static void main(String[] args) {
         Action test = new Action("test", "a", result -> {
             System.out.println("temp");
+            return null;
         });
 
         HashMap<?, ?> temp = gson.fromJson("{\"test\": {\"test\": \"test\"}}", HashMap.class);

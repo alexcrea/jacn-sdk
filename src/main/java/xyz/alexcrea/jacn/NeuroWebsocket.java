@@ -59,8 +59,46 @@ public class NeuroWebsocket extends WebSocketClient {
         onWebsocketOpen.accept(serverHandshake);
     }
 
+    private void actionExecuteFailed(@NotNull ActionRequest request, @NotNull String reason) {
+        String report = "Could not execute action request " + request.from().getName() + ": " + reason;
+        System.err.println(report);
+
+        ActionResult failed;
+        if (request.from().isReportFailure()) {
+            failed = new ActionResult(request.id(), false, report);
+        } else {
+            failed = new ActionResult(request.id(), true, "");
+        }
+
+        sendResult(failed);
+    }
+
     private void executeActionRequest(@NotNull ActionRequest request) {
-        // TODO
+        // Do Action and get result
+        ActionResult result;
+        try {
+            result = request.from().getOnResult().apply(request);
+            if (result == null) {
+                actionExecuteFailed(request, "result is returned null");
+                return;
+            }
+
+        } catch (Exception e) {
+            actionExecuteFailed(request, "Exception thrown while executing the request: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        // Send result
+        sendResult(result);
+
+        // Do after result
+        try {
+            request.from().getAfterResult().accept(request, result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -95,7 +133,7 @@ public class NeuroWebsocket extends WebSocketClient {
             }
 
             ActionRequest request = findRequest(data, message);
-            if(request == null) return;
+            if (request == null) return;
 
             executeActionRequest(request);
         } catch (JsonSyntaxException e) {
@@ -146,8 +184,8 @@ public class NeuroWebsocket extends WebSocketClient {
         if (action == null) {
             // This is kind of complicated:
             // We know we can't find the action (it is not registered on our side.)
-            // But we can't report as failure as the Neuro side would retry
-            // So we report a success with no message just in case
+            // But we can't report as failure as the Neuro side may retry if the action was force
+            // So we report a success with no message just in case to avoid an infinite loop
             sendResult(new ActionResult(id, true, ""));
             return null;
         }
