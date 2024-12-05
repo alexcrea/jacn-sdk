@@ -2,6 +2,7 @@ package xyz.alexcrea.jacn;
 
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
@@ -32,10 +33,11 @@ public class NeuroSDK {
     private final HashMap<String, Action> registeredActions;
 
     /**
-     * Create a Neuro sdk via a builder
+     * Create and connect to Neuro sdk websocket via a builder
      *
-     * @param builder the builder to base from
+     * @param builder the builder to base the websocket from
      */
+    @NonBlocking
     public NeuroSDK(@NotNull NeuroSDKBuilder builder) {
         this.gameName = builder.getGameName();
 

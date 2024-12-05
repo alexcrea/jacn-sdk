@@ -30,6 +30,18 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // We only want the websocket and gson as they are necessary. but not the annotation.
+    // There may be a better way to include these dependency but this works so
+    from({
+        configurations.runtimeClasspath.get()
+            .filter { it.name.contains("Java-WebSocket") || it.name.contains("gson") }
+            .map { zipTree(it) }
+    })
+}
+
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(java.sourceSets.main.get().java)

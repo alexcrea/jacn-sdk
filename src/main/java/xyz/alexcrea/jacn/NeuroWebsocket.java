@@ -5,6 +5,7 @@ import com.google.gson.JsonSyntaxException;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
@@ -20,6 +21,7 @@ import java.util.function.Consumer;
 /**
  * The websocket for the Neuro sdk api
  */
+@ApiStatus.Internal
 public class NeuroWebsocket extends WebSocketClient {
 
     private static final Gson gson = new Gson();

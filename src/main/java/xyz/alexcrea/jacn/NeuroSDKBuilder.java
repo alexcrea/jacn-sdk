@@ -1,6 +1,7 @@
 package xyz.alexcrea.jacn;
 
 import org.java_websocket.handshake.ServerHandshake;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.error.WebsocketException;
@@ -266,11 +267,16 @@ public class NeuroSDKBuilder {
 
     /**
      * Create and open a Neuro sdk with the builder properties.
-     * Will also try to connect to it.
+     * Will also try to connect to it in a non-blocking way:
+     * You can continue execution. {@link #setOnConnect onConnect} will get executed when the websocket is open.
+     * <p>
+     * No guaranty on when will the websocket will be ready.
+     * But if neuro do not run or address/port is invalid then it will never get connected.
      *
      * @return the Neuro sdk instance with websocket opening.
      */
     @NotNull
+    @NonBlocking
     public NeuroSDK build() {
         return new NeuroSDK(this);
     }
