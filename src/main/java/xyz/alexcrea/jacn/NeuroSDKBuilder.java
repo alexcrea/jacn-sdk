@@ -18,12 +18,14 @@ public class NeuroSDKBuilder {
     private static final String DEFAULT_ADDRESS = "localhost";
     private static final short DEFAULT_PORT = 42;
 
+    private @NotNull String gameName;
+
     private String address = DEFAULT_ADDRESS;
     private short port = DEFAULT_PORT;
 
-    private Consumer<ServerHandshake> onWebsocketOpen;
-    private Consumer<String> onWebsocketClose;
-    private Consumer<Exception> onWebsocketError;
+    private Consumer<ServerHandshake> onConnect;
+    private Consumer<String> onClose;
+    private Consumer<Exception> onError;
 
     private List<Action> actionList;
 
@@ -33,18 +35,24 @@ public class NeuroSDKBuilder {
      * Default builder has localhost as address and 42 as port.
      * It also log error to system err on connect and print stacktrace on error.
      * No default action is prepared to be registered by default
+     *
+     * @param gameName The game name.
+     *                 You should use the game's display name, including any spaces and symbols
+     *                 (e.g "Buckshot Roulette").
+     *                 The server will not include this field
      */
-    public NeuroSDKBuilder() {
-        this.onWebsocketOpen = serverHandshake -> {
+    public NeuroSDKBuilder(@NotNull String gameName) {
+        this.gameName = gameName;
+
+        this.onConnect = serverHandshake -> {
             short status = serverHandshake.getHttpStatus();
             if (status < 200 || status >= 300) {
-                System.err.println("Got error while running the websocket: "+
+                System.err.println("Got error while running the websocket: " +
                         "(" + serverHandshake.getHttpStatus() + ") " + serverHandshake.getHttpStatusMessage());
             }
-
         };
-        this.onWebsocketClose = string -> {};
-        this.onWebsocketError = error -> {
+        this.onClose = string -> {};
+        this.onError = error -> {
             new WebsocketException("Got error while running the websocket: ", error).printStackTrace();
         };
 
@@ -57,10 +65,13 @@ public class NeuroSDKBuilder {
      * <p>
      * Action will only be able to be registered after this even is triggered.
      * Excepted action that planned to be registered on open that will get registered just before this action is executed.
-     * @param onWebsocketOpen the consumer to execute on open
+     *
+     * @param onOpen the consumer to execute on open
+     * @return this
      */
-    public void setOnWebsocketOpen(@NotNull Consumer<ServerHandshake> onWebsocketOpen) {
-        this.onWebsocketOpen = onWebsocketOpen;
+    public NeuroSDKBuilder setOnConnect(@NotNull Consumer<ServerHandshake> onOpen) {
+        this.onConnect = onOpen;
+        return this;
     }
 
     /**
@@ -68,81 +79,102 @@ public class NeuroSDKBuilder {
      * Default to do nothing
      * <p>
      * Action will not be able to get registered after this
-     * @param onWebsocketClose the consumer to execute on open
+     *
+     * @param onClose the consumer to execute on open
+     * @return this
      */
-    public void setOnWebsocketClose(@NotNull Consumer<String> onWebsocketClose) {
-        this.onWebsocketClose = onWebsocketClose;
+    public NeuroSDKBuilder setOnClose(@NotNull Consumer<String> onClose) {
+        this.onClose = onClose;
+        return this;
     }
 
     /**
      * Get the consumer to be executed on websocket error.
      * Default to print stacktrace of the error.
-     * @param onWebsocketError the consumer to execute on error
+     *
+     * @param onError the consumer to execute on error
+     * @return this
      */
-    public void setOnWebsocketError(@NotNull Consumer<Exception> onWebsocketError) {
-        this.onWebsocketError = onWebsocketError;
+    public NeuroSDKBuilder setOnError(@NotNull Consumer<Exception> onError) {
+        this.onError = onError;
+        return this;
     }
 
     /**
      * Set the actions that will be registered if the websocket connected successfully.
      * <p>
      * please note: There is no guaranty on what thread the action result is called by.
+     *
      * @param actions the list of actions to get registered
+     * @return this
      */
-    public void setActionsOnConnect(@NotNull List<Action> actions) {
+    public NeuroSDKBuilder setActionsOnConnect(@NotNull List<Action> actions) {
         this.actionList = new ArrayList<>(actions);
+        return this;
     }
 
     /**
      * Set the actions that will be registered if the websocket connected successfully.
      * <p>
      * please note: There is no guaranty on what thread the action result is called by.
+     *
      * @param actions the list of actions to get registered
+     * @return this
      */
-    public void setActionsOnConnect(@NotNull Action... actions) {
-        setActionsOnConnect(List.of(actions));
+    public NeuroSDKBuilder setActionsOnConnect(@NotNull Action... actions) {
+        return setActionsOnConnect(List.of(actions));
     }
 
     /**
      * Add action to be registered if the websocket get connected successfully
      * <p>
      * please note: There is no guaranty on what thread the action result is called by.
+     *
      * @param actions the list of actions to get registered
+     * @return this
      */
-    public void addActionsOnConnect(@NotNull List<Action> actions) {
+    public NeuroSDKBuilder addActionsOnConnect(@NotNull List<Action> actions) {
         this.actionList.addAll(actions);
+        return this;
     }
 
     /**
      * Add action to be registered if the websocket get connected successfully
      * <p>
      * please note: There is no guaranty on what thread the action result is called by.
+     *
      * @param actions the list of actions to get registered
+     * @return this
      */
-    public void addActionsOnConnect(@NotNull Action... actions) {
-        addActionsOnConnect(List.of(actions));
+    public NeuroSDKBuilder addActionsOnConnect(@NotNull Action... actions) {
+        return addActionsOnConnect(List.of(actions));
     }
 
     /**
      * Set the webserver expected port
      *
      * @param port the webserver port
+     * @return this
      */
-    public void setPort(short port) {
+    public NeuroSDKBuilder setPort(short port) {
         this.port = port;
+        return this;
     }
 
     /**
      * Set the expected websocket address
      *
      * @param address the websocket address
+     * @return this
      */
-    public void setAddress(String address) {
+    public NeuroSDKBuilder setAddress(String address) {
         this.address = address;
+        return this;
     }
 
     /**
      * Get the expected websocket address
+     *
      * @return the expected address
      */
     @NotNull
@@ -164,12 +196,14 @@ public class NeuroSDKBuilder {
      * Default is a consumer that, if the return code is not 200, print an error to system err.
      * <p>
      * Action will only be able to be registered after this even is triggered.
-     * Excepted action that planned to be registered on open that will get registered just before this action is executed.
+     * Excepted action that planned to be registered on open that will get registered
+     * just before this action is executed.
+     *
      * @return the consumer to execute on open
      */
     @NotNull
-    public Consumer<ServerHandshake> getOnWebsocketOpen() {
-        return onWebsocketOpen;
+    public Consumer<ServerHandshake> getOnConnect() {
+        return onConnect;
     }
 
     /**
@@ -177,25 +211,28 @@ public class NeuroSDKBuilder {
      * Default to do nothing
      * <p>
      * Action will not be able to get registered after this
-     * @return  the consumer to execute on open
+     *
+     * @return the consumer to execute on open
      */
     @NotNull
-    public Consumer<String> getOnWebsocketClose() {
-        return onWebsocketClose;
+    public Consumer<String> getOnClose() {
+        return onClose;
     }
 
     /**
      * Get the consumer to be executed on websocket error.
      * Default to print stacktrace of the error.
-     * @return  the consumer to execute on error
+     *
+     * @return the consumer to execute on error
      */
     @NotNull
-    public Consumer<Exception> getOnWebsocketError() {
-        return onWebsocketError;
+    public Consumer<Exception> getOnError() {
+        return onError;
     }
 
     /**
      * List of action that will get registered on websocket connect
+     *
      * @return the list of actions
      */
     @NotNull
@@ -204,8 +241,32 @@ public class NeuroSDKBuilder {
     }
 
     /**
+     * Get the game name.
+     *
+     * @return the game name
+     */
+    public @NotNull String getGameName() {
+        return gameName;
+    }
+
+    /**
+     * Set the game name.
+     * You should use the game's display name, including any spaces and symbols
+     * (e.g "Buckshot Roulette").
+     * The server will not include this field
+     *
+     * @param gameName the game name
+     * @return this
+     */
+    public NeuroSDKBuilder setGameName(@NotNull String gameName) {
+        this.gameName = gameName;
+        return this;
+    }
+
+    /**
      * Create and open a neuro sdk with the builder properties.
      * Will also try to connect to it.
+     *
      * @return the neuro sdk instance with websocket opening.
      */
     @NotNull

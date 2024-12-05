@@ -1,9 +1,10 @@
 package xyz.alexcrea.jacn.action;
 
+import com.google.gson.Gson;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.alexcrea.jacn.ActionFailed;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -11,67 +12,77 @@ import java.util.function.Consumer;
  */
 public class Action {
 
-    private final @NotNull String id;
-    private final @NotNull ActionType type;
+    private static final Gson gson = new Gson();
+
+    private final @NotNull String name;
+    private final @NotNull String description;
     private @NotNull Consumer<ActionResult> onResult;
 
     private @NotNull Consumer<ActionFailed> onFailed;
 
     private @Nullable String data;
 
-    //TODO add other things when API release
+    //TODO add schema correctly
 
     /**
      * Represent any action to send to neuro
      *
-     * @param id       the action id
-     * @param type     the action type
-     * @param onResult called when action is successful.
-     *                 please note: There is no guaranty on what thread the action result is called by.
-     * @param data     the JSON schema to parse (type and name is temporary)
+     * @param name        The name of the action, which is a unique identifier.
+     *                    This should be a lowercase string, with words seperated by underscore or dashes
+     *                    (e.g "join_friend_lobby", "use_item")
+     * @param description A plaintext description of what this action does.
+     *                    This information is directly received by Neuro.
+     * @param data        the JSON schema to parse (type and name is temporary) TODO
+     * @param onResult    called when action is successful.
+     *                    please note: There is no guaranty on what thread the action result is called by.
      */
-    public Action(@NotNull String id,
-                  @NotNull ActionType type,
-                  @NotNull Consumer<ActionResult> onResult,
-                  @Nullable String data) {
-        this.id = id;
-        this.type = type;
+    public Action(@NotNull String name,
+                  @NotNull String description,
+                  @Nullable String data,
+                  @NotNull Consumer<ActionResult> onResult) {
+        this.name = name.toLowerCase();
+        this.description = description;
+        this.data = data;
+
         this.onResult = onResult;
         this.onFailed = (failed) -> {
             //TODO see what to do when api doc is released
         };
-        this.data = data;
     }
 
     /**
      * Represent any action to send to neuro
      *
-     * @param id       the action id
-     * @param type     the action type
-     * @param onResult called when action is successful
+     * @param name        The name of the action, which is a unique identifier.
+     *                    This should be a lowercase string, with words seperated by underscore or dashes
+     *                    (e.g "join_friend_lobby", "use_item")
+     * @param description A plaintext description of what this action does.
+     *                    This information is directly received by Neuro.
+     * @param onResult    called when action is successful.
+     *                    please note: There is no guaranty on what thread the action result is called by.
      */
-    public Action(@NotNull String id,
-                  @NotNull ActionType type,
+    public Action(@NotNull String name,
+                  @NotNull String description,
                   @NotNull Consumer<ActionResult> onResult) {
-        this(id, type, onResult, null);
+        this(name, description, null, onResult);
     }
 
     /**
-     * Gets id.
+     * Get the action name.
      *
-     * @return the id
+     * @return the action name
      */
-    public @NotNull String getId() {
-        return id;
+    public @NotNull String getName() {
+        return name;
     }
 
     /**
-     * Get the action type.
+     * Get the action description.
      *
-     * @return the action type
+     * @return the action description
      */
-    public @NotNull ActionType getType() {
-        return type;
+    public @NotNull String getDescription() {
+        return description;
     }
 
     /**
@@ -117,6 +128,7 @@ public class Action {
     }
 
     /**
+     * TODO
      * Get the JSON schema.
      *
      * @return the JSON schema
@@ -126,6 +138,7 @@ public class Action {
     }
 
     /**
+     * TODO
      * Set the JSON schema.
      *
      * @param data the JSON schema
@@ -135,6 +148,14 @@ public class Action {
     public Action setData(@Nullable String data) {
         this.data = data;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return gson.toJson(Map.of(
+                "name", this.name,
+                "description", this.description,
+                "schema", data == null ? "{}" : data)); // TODO better data
     }
 
 }

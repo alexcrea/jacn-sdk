@@ -4,6 +4,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.ConnectException;
 import java.net.URI;
 import java.util.function.Consumer;
 
@@ -20,21 +21,24 @@ public class NeuroWebsocket extends WebSocketClient {
     private final @NotNull Consumer<String> onWebsocketClose;
     private final @NotNull Consumer<String> onWebsocketCloseInternal;
 
+    private final @NotNull Consumer<ConnectException> onConnectErrorInternal;
     private final @NotNull Consumer<Exception> onWebsocketError;
 
     public NeuroWebsocket(@NotNull URI serverUri, @NotNull NeuroSDK parent, @NotNull NeuroSDKBuilder builder,
                           @NotNull Consumer<ServerHandshake> onWebsocketOpenInternal,
-                          @NotNull Consumer<String> onWebsocketCloseInternal) {
+                          @NotNull Consumer<String> onWebsocketCloseInternal,
+                          @NotNull Consumer<ConnectException> onConnectErrorInternal) {
         super(serverUri);
         this.parent = parent;
 
-        this.onWebsocketOpen = builder.getOnWebsocketOpen();
+        this.onWebsocketOpen = builder.getOnConnect();
         this.onWebsocketOpenInternal = onWebsocketOpenInternal;
 
-        this.onWebsocketClose = builder.getOnWebsocketClose();
+        this.onWebsocketClose = builder.getOnClose();
         this.onWebsocketCloseInternal = onWebsocketCloseInternal;
 
-        this.onWebsocketError = builder.getOnWebsocketError();
+        this.onConnectErrorInternal = onConnectErrorInternal;
+        this.onWebsocketError = builder.getOnError();
     }
 
     @Override
@@ -58,6 +62,10 @@ public class NeuroWebsocket extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
+        if (e instanceof ConnectException connectException) {
+            onConnectErrorInternal.accept(connectException);
+        }
+
         onWebsocketError.accept(e);
     }
 }

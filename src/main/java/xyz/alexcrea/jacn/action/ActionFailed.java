@@ -1,4 +1,4 @@
-package xyz.alexcrea.jacn;
+package xyz.alexcrea.jacn.action;
 
 public record ActionFailed(
         //TODO

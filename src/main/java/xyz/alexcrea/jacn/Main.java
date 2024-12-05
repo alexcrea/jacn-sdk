@@ -1,13 +1,28 @@
 package xyz.alexcrea.jacn;
 
+import xyz.alexcrea.jacn.action.Action;
+
 // Only temporary for manual test.
 // Test will get on test folder when randy is published & CI-able
 public class Main {
 
     public static void main(String[] args) {
-        NeuroSDK SDK = new NeuroSDKBuilder().build();
+        Action test = new Action("test", "a", result -> {
+            System.out.println("temp");
+        });
 
+        NeuroSDK SDK = new NeuroSDKBuilder("Test 42")
+                .addActionsOnConnect(test)
+                .setOnConnect((handshake -> System.out.println("connected")))
+                .setOnClose((reason) -> System.out.println("closed: " + reason))
+                .setOnError((error) -> {
+                    System.out.println("error running websocket");
+                    error.printStackTrace();
+                })
+                .build();
 
+        if (!SDK.unregisterActions(test)) System.out.println("sadge");
+        if (!SDK.registerActions(test)) System.out.println("sadge");
     }
 
 }
