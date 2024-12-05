@@ -16,9 +16,6 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-.idea/hotswap_agent.xml
-.idea/uiDesigner.xml
-
 ### Eclipse ###
 .apt_generated
 .classpath
@@ -43,3 +40,9 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Other ###
+.idea/hotswap_agent.xml
+.idea/uiDesigner.xml
+.idea/.name
+.lastDeploymentsId

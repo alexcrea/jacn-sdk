@@ -1,2 +1,2 @@
-rootProject.name = "JACN_SDK"
+rootProject.name = "jacn_sdk"
 
