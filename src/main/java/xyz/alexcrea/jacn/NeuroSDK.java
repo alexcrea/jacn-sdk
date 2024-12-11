@@ -9,10 +9,7 @@ import xyz.alexcrea.jacn.action.Action;
 
 import java.net.ConnectException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -65,7 +62,7 @@ public class NeuroSDK {
     }
 
     private void onConnect(@NotNull ServerHandshake handshake) {
-        if (handshake.getHttpStatus() < 200 || handshake.getHttpStatus() >= 300) {
+        if ((handshake.getHttpStatus() < 200 || handshake.getHttpStatus() >= 300) && (handshake.getHttpStatus() != 101)) {
             this.state = NeuroSDKState.ERROR;
             return;
         }
@@ -112,7 +109,7 @@ public class NeuroSDK {
      * @param action the action to unregister
      * @return false if it was not registered. true otherwise.
      */
-    public boolean internalUnregisterAction(@NotNull Action action) {
+    private boolean internalUnregisterAction(@NotNull Action action) {
         return registeredActions.remove(action.getName(), action);
     }
 
@@ -190,7 +187,7 @@ public class NeuroSDK {
         }
 
         // register the startup actions
-        if (!registerActions(actionsToRegisterOnConnect)) {
+        if (!internalRegisterActions(actionsToRegisterOnConnect)) {
             System.err.println("Could not register startup actions");
             this.state = NeuroSDKState.ERROR;
 
@@ -224,6 +221,20 @@ public class NeuroSDK {
         ));
     }
 
+    public boolean internalRegisterActions(List<Action> actions) {
+        registerLock.readLock().lock();
+        List<Map<String, Object>> actionList = new ArrayList<>();
+        for (Action action : actions) {
+            if (!internalRegisterAction(action)) {
+                System.err.println("Could not register action " + action.getName());
+            }
+            actionList.add(action.asMap());
+        }
+        registerLock.readLock().unlock();
+
+        return websocket.sendCommand("actions/register", Map.of("actions", actionList), true);
+    }
+
     /**
      * Register a list of actions
      * <p>
@@ -234,16 +245,7 @@ public class NeuroSDK {
      */
     public boolean registerActions(List<Action> actions) {
         if (!NeuroSDKState.CONNECTED.equals(this.state)) return false;
-
-        registerLock.readLock().lock();
-        for (Action action : actions) {
-            if (!internalRegisterAction(action)) {
-                System.err.println("Could not register action " + action.getName());
-            }
-        }
-        registerLock.readLock().unlock();
-
-        return websocket.sendCommand("actions/register", Map.of("actions", actions));
+        return internalRegisterActions(actions);
     }
 
     /**
@@ -269,14 +271,16 @@ public class NeuroSDK {
         if (!NeuroSDKState.CONNECTED.equals(this.state)) return false;
 
         registerLock.readLock().lock();
+        List<String> actionNames = new ArrayList<>();
         for (Action action : actions) {
             if (!internalUnregisterAction(action)) {
                 System.err.println("Could not unregister action " + action.getName());
             }
+
+            actionNames.add(action.getName());
         }
         registerLock.readLock().unlock();
 
-        List<String> actionNames = new ArrayList<>(registeredActions.keySet());
         return websocket.sendCommand("actions/unregister", Map.of("action_names", actionNames));
     }
 
@@ -287,7 +291,7 @@ public class NeuroSDK {
      * @return if the command was successful
      */
     public boolean unregisterActions(@NotNull Action... actions) {
-        return registerActions(List.of(actions));
+        return unregisterActions(List.of(actions));
     }
 
     /**
@@ -319,7 +323,7 @@ public class NeuroSDK {
         toSend.put("ephemeral_context", ephemeral);
         toSend.put("action_names", actionNames);
 
-        return websocket.sendCommand("actions/force", Map.of("actions", toSend));
+        return websocket.sendCommand("actions/force", toSend);
     }
 
     /**
@@ -462,5 +466,33 @@ public class NeuroSDK {
         return forceActions(query, List.of(action));
     }
 
+    /**
+     * Get all registered actions
+     * @return a list of all the registered actions
+     */
+    public List<Action> getRegisteredActions() {
+        return new ArrayList<>(this.registeredActions.values());
+    }
+
+
+    /**
+     * Gracefully close the websocket
+     * @param reason Reason of why the sdk is closed
+     */
+    public void close(String reason){
+        if(this.state == NeuroSDKState.CONNECTED){
+            this.onClose(reason);
+        }
+
+        this.state = NeuroSDKState.CLOSED;
+        this.websocket.close(CloseFrame.NORMAL, reason);
+    }
+
+    /**
+     * Gracefully close the websocket
+     */
+    public void close(){
+        close("Shutdown");
+    }
 
 }

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.error.WebsocketException;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
 public class NeuroSDKBuilder {
 
     private static final String DEFAULT_ADDRESS = "localhost";
-    private static final short DEFAULT_PORT = 42;
+    private static final short DEFAULT_PORT = 8000;
 
     private @NotNull String gameName;
 
@@ -45,16 +46,26 @@ public class NeuroSDKBuilder {
     public NeuroSDKBuilder(@NotNull String gameName) {
         this.gameName = gameName;
 
-        this.onConnect = serverHandshake -> {
-            short status = serverHandshake.getHttpStatus();
+        this.onConnect = handshake -> {
+            short status = handshake.getHttpStatus();
+            if(status == 101) return;
+
             if (status < 200 || status >= 300) {
-                System.err.println("Got error while running the websocket: " +
-                        "(" + serverHandshake.getHttpStatus() + ") " + serverHandshake.getHttpStatusMessage());
+                System.err.println("Got error while connecting to the websocket: " +
+                        "(" + handshake.getHttpStatus() + ") " + handshake.getHttpStatusMessage() +
+                        "\nIs Neuro or randy open ?");
             }
         };
         this.onClose = string -> {
+            System.out.println("Closed: " + string);
         };
         this.onError = error -> {
+            if(error instanceof ConnectException) {
+                System.err.println("Error connecting to the websocket");
+                System.err.println("Is Neuro or Randy open ?");
+                return;
+            }
+
             new WebsocketException("Got error while running the websocket: ", error).printStackTrace();
         };
 

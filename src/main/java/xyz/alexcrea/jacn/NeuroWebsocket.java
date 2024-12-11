@@ -122,6 +122,11 @@ public class NeuroWebsocket extends WebSocketClient {
 
             String command = commandObj.toString();
             if (!command.contentEquals("action")) {
+                if(command.contentEquals("actions/reregister_all")){
+                    // We ignore it as Neuro do not have this action currently.
+                    return;
+                }
+
                 sendInvalidFeedbackUnknownID(message, "Invalid command. only accept action command." +
                         "\nmessage: " + message);
                 return;
@@ -148,7 +153,10 @@ public class NeuroWebsocket extends WebSocketClient {
 
     private void sendInvalidFeedbackUnknownID(@NotNull String message, String errorToSend) {
         String id = findID(message);
-        if (id == null) return;
+        if (id == null) {
+            System.err.println(errorToSend);
+            return;
+        }
         sendInvalidFeedbackKnownID(id, errorToSend);
     }
 

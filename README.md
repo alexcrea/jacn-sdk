@@ -1,7 +1,8 @@
 This Neuro SDK api implementation currently is not tested 
 # Java alexcrea's Neuro SDK
 This Neuro SDK implementation is a, bad, unofficial, 
-implementation of the NeuroSDK API via [websocket](https://youtu.be/1TRlupOj0i0) (TODO correct link to the api doc)
+implementation of the [Neuro SDK API](https://github.com/VedalAI/neuro-game-sdk/blob/main/API/README.md)
+This implementation do not currently support JSON schema for actions
 
 ## Using the SDK
 You need to install the SDK, then follow the [Usage Guide](./USAGE.md)
@@ -68,8 +69,12 @@ It is also recommended you add jetbrain's annotation from
 </dependency>
 ```
 
-
 ---
+
+## List of things to do before this being usable:
+- [ ] Make JSON schema
+- [ ] Implement a better way to handle things 
+- [ ] Create example & docs of how to use the better way
 
 ## Need help or suggestion ?
 You can either create an issue/pr/discussion here or join [my discord](https://discord.gg/swBrMf327a)

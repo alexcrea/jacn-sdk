@@ -1,9 +1,11 @@
 package xyz.alexcrea.jacn.action;
 
 import com.google.gson.Gson;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -25,6 +27,7 @@ public class Action {
 
     //private @NotNull Consumer<ActionFailed> onFailed;
 
+    @ApiStatus.Experimental
     private @Nullable String data;
 
     //TODO add schema correctly
@@ -54,6 +57,7 @@ public class Action {
      *                    Behavior may change in the future to make it more safe (exception may not be reported as failure for example).
      *                    If you think of a better/safer system please propose it.
      */
+    @ApiStatus.Experimental
     public Action(@NotNull String name,
                   @NotNull String description,
                   @Nullable String data,
@@ -236,6 +240,7 @@ public class Action {
      *
      * @return the JSON schema
      */
+    @ApiStatus.Experimental
     public @Nullable String getData() {
         return data;
     }
@@ -247,18 +252,25 @@ public class Action {
      * @param data the JSON schema
      * @return this
      */
+    @ApiStatus.Experimental
     @NotNull
     public Action setData(@Nullable String data) {
         this.data = data;
         return this;
     }
 
-    @Override
-    public String toString() {
-        return gson.toJson(Map.of(
-                "name", this.name,
-                "description", this.description,
-                "schema", data == null ? "{}" : data)); // TODO better data
-    }
+    /**
+     * Return as a map object that will be sent to Neuro
+     * @return the map object representing this action
+     */
+    public Map<String, Object> asMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("description", description);
+        if(data != null) {
+            map.put("data", data); // TODO better data
+        }
 
+        return map;
+    }
 }
