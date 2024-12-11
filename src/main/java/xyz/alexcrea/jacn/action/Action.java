@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -252,6 +254,19 @@ public class Action {
         return setSchemaFromURI(URI.create(uri));
     }
 
+    public @NotNull Action setSchemaFromResource(@Nullable String resourcePath) {
+        if (resourcePath == null) {
+            this.schema = null;
+            return this;
+        }
+
+        URL resource = getClass().getClassLoader().getResource(resourcePath);
+        try {
+            return this.setSchemaFromURI(resource.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Set the expected JsonSchema
@@ -289,7 +304,7 @@ public class Action {
         map.put("name", name);
         map.put("description", description);
         if(schema != null) {
-            map.put("data", schema);
+            map.put("schema", schema.getSchemaNode());
         }
 
         return map;
