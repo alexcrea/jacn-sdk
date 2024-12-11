@@ -202,10 +202,10 @@ public class NeuroWebsocket extends WebSocketClient {
 
         // TODO json schema data (json schema response. nullable)
         Object data = map.get("data");
-        String datatemp = data == null ? null : data.toString();
+        String dataAsString = data == null ? null : data.toString();
+        System.out.println(dataAsString);
 
-
-        return new ActionRequest(action, name, datatemp);
+        return new ActionRequest(action, name, dataAsString);
     }
 
     @Nullable

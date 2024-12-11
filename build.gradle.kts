@@ -21,6 +21,8 @@ dependencies {
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
     implementation("com.google.code.gson:gson:2.10.1")
 
+    implementation("com.networknt:json-schema-validator:1.5.4")
+
     // Test dependencies
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

@@ -1,10 +1,12 @@
 package xyz.alexcrea.jacn.action;
 
-import com.google.gson.Gson;
-import org.jetbrains.annotations.ApiStatus;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -15,8 +17,6 @@ import java.util.function.Function;
  */
 public class Action {
 
-    private static final Gson gson = new Gson();
-
     private final @NotNull String name;
     private final @NotNull String description;
 
@@ -25,12 +25,7 @@ public class Action {
 
     private boolean reportFailure;
 
-    //private @NotNull Consumer<ActionFailed> onFailed;
-
-    @ApiStatus.Experimental
-    private @Nullable String data;
-
-    //TODO add schema correctly
+    private @Nullable JsonSchema schema;
 
     /**
      * Represent any action to send to neuro
@@ -40,7 +35,7 @@ public class Action {
      *                    (e.g "join_friend_lobby", "use_item")
      * @param description A plaintext description of what this action does.
      *                    This information is directly received by Neuro.
-     * @param data        the JSON schema to parse (type and name is temporary) TODO
+     * @param schema      the JSON schema to parse (type and name is temporary) TODO
      * @param onResult    action called when send by Neuro and successfully parsed.
      *                    please note:
      *                    <p>
@@ -57,14 +52,13 @@ public class Action {
      *                    Behavior may change in the future to make it more safe (exception may not be reported as failure for example).
      *                    If you think of a better/safer system please propose it.
      */
-    @ApiStatus.Experimental
     public Action(@NotNull String name,
                   @NotNull String description,
-                  @Nullable String data,
+                  @Nullable JsonSchema schema,
                   @NotNull Function<@NotNull ActionRequest, ActionResult> onResult) {
         this.name = name.toLowerCase();
         this.description = description;
-        this.data = data;
+        this.schema = schema;
 
         this.onResult = onResult;
         this.afterResult = (ignored1, ignored2) -> {
@@ -213,49 +207,76 @@ public class Action {
         return this;
     }
 
-    /*/**
-     * Get the consumer to call on JSON schema validation fail.
-     *
-     * @return the action executed on JSON parsing fail
-     */
-    /*public @NotNull Consumer<ActionFailed> getOnFailed() {
-        return onFailed;
-    }*/
 
-    /*/**
-     * Set the consumer to call on JSON schema validation fail.
-     *
-     * @param onFailed the action executed on JSON parsing fail
-     * @return this
-     */
-    /*@NotNull
-    public Action setOnFailed(@NotNull Consumer<ActionFailed> onFailed) {
-        this.onFailed = onFailed;
-        return this;
-    }*/
+    private static final JsonSchemaFactory jsonSchemaFactory =
+            JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012);
 
     /**
-     * TODO
-     * Get the JSON schema.
-     *
-     * @return the JSON schema
+     * Get the JSON schema of this action.
+     * @return the json schema.
      */
-    @ApiStatus.Experimental
-    public @Nullable String getData() {
-        return data;
+    public @Nullable JsonSchema getSchema() {
+        return schema;
     }
 
     /**
-     * TODO
-     * Set the JSON schema.
+     * Set the JSON schema from a document present on the URI location.
      *
-     * @param data the JSON schema
+     * @param uri the schema location
      * @return this
      */
-    @ApiStatus.Experimental
     @NotNull
-    public Action setData(@Nullable String data) {
-        this.data = data;
+    public Action setSchemaFromURI(@Nullable URI uri) {
+        if(uri == null) {
+            this.schema = null;
+            return this;
+        }
+
+        this.schema = jsonSchemaFactory.getSchema(uri);
+        return this;
+    }
+
+    /**
+     * Set the JSON schema from a document present on the URI location.
+     *
+     * @param uri the schema location
+     * @return this
+     */
+    @NotNull
+    public Action setSchemaFromURI(@Nullable String uri) {
+        if(uri == null) {
+            this.schema = null;
+            return this;
+        }
+
+        return setSchemaFromURI(URI.create(uri));
+    }
+
+
+    /**
+     * Set the expected JsonSchema
+     * @param schema the json schema to validate
+     * @return this
+     */
+    @NotNull
+    public Action setSchema(@Nullable JsonSchema schema) {
+        this.schema = schema;
+        return this;
+    }
+
+    /**
+     * Set the expected JsonSchema from raw string
+     * @param rawSchema the json schema to validate as a plain string
+     * @return this
+     */
+    @NotNull
+    public Action setSchema(@Nullable String rawSchema) {
+        if(rawSchema == null) {
+            this.schema = null;
+            return this;
+        }
+
+        this.schema = jsonSchemaFactory.getSchema(rawSchema);
         return this;
     }
 
@@ -267,8 +288,8 @@ public class Action {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);
         map.put("description", description);
-        if(data != null) {
-            map.put("data", data); // TODO better data
+        if(schema != null) {
+            map.put("data", schema); // TODO better data
         }
 
         return map;
