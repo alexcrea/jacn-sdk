@@ -1,5 +1,6 @@
 package xyz.alexcrea.jacn.error;
 
+@SuppressWarnings({"unused"})
 public class WebsocketException extends Exception {
 
     public WebsocketException() {

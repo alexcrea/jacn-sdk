@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
  * An action result is information sent back to Neuro to inform the result of the action
  *
  * @param id      the action id from the action request
- * @param success whether or not the action was successful.
+ * @param success whether the action was successful.
  *                If this is false and this action if part of an action force,
  *                the whole actions force will be immediately retried by Neuro.
  * @param message a plaintext message that describe what happened when the action was executed.
@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
  *                or provide a small context to Neuro regarding the action she just took
  *                (e.g. "Remember to not share this with anyone."). This information will be directly received by Neuro.
  */
+@SuppressWarnings({"unused"})
 public record ActionResult(
         @NotNull String id,
         boolean success,

@@ -17,13 +17,14 @@ import java.util.function.Function;
 /**
  * Represent any action to send to neuro
  */
+@SuppressWarnings({"unused"})
 public class Action {
 
     private final @NotNull String name;
     private final @NotNull String description;
 
-    private @NotNull Function<@NotNull ActionRequest, @Nullable ActionResult> onResult;
-    private @NotNull BiConsumer<@NotNull ActionRequest, @NotNull ActionResult> afterResult;
+    private @Nullable Function<@NotNull ActionRequest, @Nullable ActionResult> onResult;
+    private @Nullable BiConsumer<@NotNull ActionRequest, @NotNull ActionResult> afterResult;
 
     private boolean reportFailure;
 
@@ -57,14 +58,13 @@ public class Action {
     public Action(@NotNull String name,
                   @NotNull String description,
                   @Nullable JsonSchema schema,
-                  @NotNull Function<@NotNull ActionRequest, ActionResult> onResult) {
+                  @Nullable Function<@Nullable ActionRequest, ActionResult> onResult) {
         this.name = name.toLowerCase();
         this.description = description;
         this.schema = schema;
 
         this.onResult = onResult;
-        this.afterResult = (ignored1, ignored2) -> {
-        };
+        this.afterResult = null;
 
         this.reportFailure = false;
     }
@@ -100,6 +100,36 @@ public class Action {
     }
 
     /**
+     * Represent any action to send to neuro
+     *
+     * @param name        The name of the action, which is a unique identifier.
+     *                    This should be a lowercase string, with words seperated by underscore or dashes
+     *                    (e.g "join_friend_lobby", "use_item")
+     * @param description A plaintext description of what this action does.
+     *                    This information is directly received by Neuro.
+     * @param schema      the JSON schema to parse
+     */
+    public Action(@NotNull String name,
+                  @NotNull String description,
+                  @Nullable JsonSchema schema) {
+        this(name, description, schema, null);
+    }
+
+    /**
+     * Represent any action to send to neuro
+     *
+     * @param name        The name of the action, which is a unique identifier.
+     *                    This should be a lowercase string, with words seperated by underscore or dashes
+     *                    (e.g "join_friend_lobby", "use_item")
+     * @param description A plaintext description of what this action does.
+     *                    This information is directly received by Neuro.
+     */
+    public Action(@NotNull String name,
+                  @NotNull String description) {
+        this(name, description, null, null);
+    }
+
+    /**
      * Get the action name.
      *
      * @return the action name
@@ -123,7 +153,7 @@ public class Action {
      *
      * @return the action executed on result
      */
-    public @NotNull Function<@NotNull ActionRequest, @Nullable ActionResult> getOnResult() {
+    public @Nullable Function<@NotNull ActionRequest, @Nullable ActionResult> getOnResult() {
         return onResult;
     }
 
@@ -148,7 +178,7 @@ public class Action {
      * @return this
      */
     @NotNull
-    public Action setOnResult(@NotNull Function<@NotNull ActionRequest, @Nullable ActionResult> onResult) {
+    public Action setOnResult(@Nullable Function<@NotNull ActionRequest, @Nullable ActionResult> onResult) {
         this.onResult = onResult;
         return this;
     }
@@ -160,7 +190,7 @@ public class Action {
      *
      * @return the action that will be executed after result send to Neuro
      */
-    public @NotNull BiConsumer<@NotNull ActionRequest, @NotNull ActionResult> getAfterResult() {
+    public @Nullable BiConsumer<@NotNull ActionRequest, @Nullable ActionResult> getAfterResult() {
         return afterResult;
     }
 
@@ -173,7 +203,7 @@ public class Action {
      * @return this
      */
     @NotNull
-    public Action setAfterResult(@NotNull BiConsumer<@NotNull ActionRequest, @NotNull ActionResult> afterResult) {
+    public Action setAfterResult(@Nullable BiConsumer<@NotNull ActionRequest, @NotNull ActionResult> afterResult) {
         this.afterResult = afterResult;
         return this;
     }

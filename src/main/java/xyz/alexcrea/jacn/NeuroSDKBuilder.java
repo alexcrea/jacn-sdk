@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.error.WebsocketException;
+import xyz.alexcrea.jacn.listener.NeuroSDKListener;
 
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -28,6 +29,8 @@ public class NeuroSDKBuilder {
     private Consumer<ServerHandshake> onConnect;
     private Consumer<String> onClose;
     private Consumer<Exception> onError;
+
+    private List<NeuroSDKListener> listeners;
 
     private List<Action> actionList;
 
@@ -69,6 +72,7 @@ public class NeuroSDKBuilder {
             new WebsocketException("Got error while running the websocket: ", error).printStackTrace();
         };
 
+        this.listeners = new ArrayList<>();
         this.actionList = new ArrayList<>();
     }
 
@@ -273,6 +277,37 @@ public class NeuroSDKBuilder {
      */
     public NeuroSDKBuilder setGameName(@NotNull String gameName) {
         this.gameName = gameName;
+        return this;
+    }
+
+    /**
+     * Get the list of SDK listener of this builder
+     * @return the list of SDK Listeners
+     */
+    @NotNull
+    public List<NeuroSDKListener> getListeners() {
+        return listeners;
+    }
+
+    /**
+     * Set the list of SDK listeners for this builder
+     * @param listeners the list of SDK listener
+     * @return this
+     */
+    @NotNull
+    public NeuroSDKBuilder setListeners(@NotNull List<NeuroSDKListener> listeners) {
+        this.listeners = new ArrayList<>(listeners);
+        return this;
+    }
+
+    /**
+     * Add listeners to the current of listeners.
+     * @param listeners the listeners to add
+     * @return this
+     */
+    @NotNull
+    public NeuroSDKBuilder addListeners(@NotNull NeuroSDKListener... listeners) {
+        this.listeners.addAll(List.of(listeners));
         return this;
     }
 

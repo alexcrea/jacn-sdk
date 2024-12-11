@@ -13,13 +13,14 @@ import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.listener.NeuroSDKListener;
 
 import java.net.ConnectException;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * The websocket for the Neuro sdk api
@@ -30,6 +31,8 @@ public class NeuroWebsocket extends WebSocketClient {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final @NotNull NeuroSDK parent;
+
+    private final @NotNull List<NeuroSDKListener> listeners;
 
     private final @NotNull Consumer<ServerHandshake> onWebsocketOpen;
     private final @NotNull Consumer<ServerHandshake> onWebsocketOpenInternal;
@@ -47,6 +50,8 @@ public class NeuroWebsocket extends WebSocketClient {
         super(serverUri);
         this.parent = parent;
 
+        this.listeners = new ArrayList<>(builder.getListeners());
+
         this.onWebsocketOpen = builder.getOnConnect();
         this.onWebsocketOpenInternal = onWebsocketOpenInternal;
 
@@ -55,6 +60,13 @@ public class NeuroWebsocket extends WebSocketClient {
 
         this.onConnectErrorInternal = onConnectErrorInternal;
         this.onWebsocketError = builder.getOnError();
+
+        // Set the sdk to listeners
+        for (NeuroSDKListener listener : this.listeners) {
+            if (!listener.setNeuroSDK(parent)) {
+                throw new RuntimeException("Could not set sdk to a listener");
+            }
+        }
     }
 
     @Override
@@ -62,6 +74,14 @@ public class NeuroWebsocket extends WebSocketClient {
         onWebsocketOpenInternal.accept(serverHandshake);
 
         onWebsocketOpen.accept(serverHandshake);
+
+        for (NeuroSDKListener listener : listeners) {
+            try {
+                listener.onConnect(serverHandshake);
+            } catch (Exception e) {
+                throw new RuntimeException("Caught an exception executing on open for listener", e);
+            }
+        }
     }
 
     private void actionExecuteFailed(@NotNull ActionRequest request, @NotNull String reason) {
@@ -80,12 +100,11 @@ public class NeuroWebsocket extends WebSocketClient {
 
     private void executeActionRequest(@NotNull ActionRequest request) {
         // Do Action and get result
-        ActionResult result;
+        ActionResult result = null;
         try {
-            result = request.from().getOnResult().apply(request);
-            if (result == null) {
-                actionExecuteFailed(request, "result is returned null");
-                return;
+            Function<@NotNull ActionRequest, @Nullable ActionResult> onResult = request.from().getOnResult();
+            if (onResult != null) {
+                result = request.from().getOnResult().apply(request);
             }
 
         } catch (Exception e) {
@@ -94,12 +113,35 @@ public class NeuroWebsocket extends WebSocketClient {
             return;
         }
 
+        if (result == null) {
+            // Execute on listeners
+            for (NeuroSDKListener listener : listeners) {
+                try {
+                    result = listener.onActionRequest(request, this.parent);
+                    if (result != null) break;
+                } catch (Exception e) {
+                    actionExecuteFailed(request, "Exception thrown while executing the request on a listener: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        }
+
+        if (result == null) {
+            actionExecuteFailed(request, "result is returned null");
+            return;
+        }
+
         // Send result
         sendResult(result);
 
         // Do after result
         try {
-            request.from().getAfterResult().accept(request, result);
+            BiConsumer<ActionRequest, ActionResult> onResult = request.from().getAfterResult();
+
+            if (onResult != null) {
+                onResult.accept(request, result);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -277,10 +319,18 @@ public class NeuroWebsocket extends WebSocketClient {
     }
 
     @Override
-    public void onClose(int i, String s, boolean b) {
-        onWebsocketCloseInternal.accept(s);
+    public void onClose(int closeCode, String reason, boolean remote) {
+        onWebsocketCloseInternal.accept(reason);
 
-        onWebsocketClose.accept(s);
+        onWebsocketClose.accept(reason);
+
+        for (NeuroSDKListener listener : listeners) {
+            try {
+                listener.onClose(reason, remote, closeCode);
+            } catch (Exception e) {
+                throw new RuntimeException("Caught an exception executing on close for listener", e);
+            }
+        }
     }
 
     @Override
@@ -290,6 +340,14 @@ public class NeuroWebsocket extends WebSocketClient {
         }
 
         onWebsocketError.accept(e);
+
+        for (NeuroSDKListener listener : listeners) {
+            try {
+                listener.onError(e);
+            } catch (Exception e2) {
+                throw new RuntimeException("Caught an exception executing on error for listener", e2);
+            }
+        }
     }
 
     public boolean sendCommand(@NotNull String command, @Nullable Map<String, Object> data, boolean bypassConnected) {

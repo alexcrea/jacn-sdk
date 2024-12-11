@@ -10,7 +10,7 @@ see [the installation guide](./INSTALL.md)
 
 ## List of things to do before this being usable:
 - [X] Make JSON schema
-- [ ] Implement a better way to handle things 
+- [X] Implement a better way to handle things 
 - [ ] Create example & docs of how to use the better way
 
 ## Need help or suggestion ?
