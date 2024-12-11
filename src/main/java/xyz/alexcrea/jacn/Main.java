@@ -1,6 +1,7 @@
 package xyz.alexcrea.jacn;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import xyz.alexcrea.jacn.action.Action;
 
 import java.util.HashMap;
@@ -9,15 +10,15 @@ import java.util.HashMap;
 // Test will get on test folder when randy is published & CI-able
 public class Main {
 
-    private static final Gson gson = new Gson();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws JsonProcessingException {
         Action test = new Action("test", "a", result -> {
             System.out.println("temp");
             return null;
         });
 
-        HashMap<?, ?> temp = gson.fromJson("{\"test\": {\"test\": \"test\"}}", HashMap.class);
+        HashMap<?, ?> temp = objectMapper.readValue("{\"test\": {\"test\": \"test\"}}", HashMap.class);
         System.out.println(temp.get("test").getClass());
 
         NeuroSDK SDK = new NeuroSDKBuilder("Test 42")

@@ -35,7 +35,7 @@ public class Action {
      *                    (e.g "join_friend_lobby", "use_item")
      * @param description A plaintext description of what this action does.
      *                    This information is directly received by Neuro.
-     * @param schema      the JSON schema to parse (type and name is temporary) TODO
+     * @param schema      the JSON schema to parse
      * @param onResult    action called when send by Neuro and successfully parsed.
      *                    please note:
      *                    <p>
@@ -270,7 +270,7 @@ public class Action {
      * @return this
      */
     @NotNull
-    public Action setSchema(@Nullable String rawSchema) {
+    public Action setSchemaRaw(@Nullable String rawSchema) {
         if(rawSchema == null) {
             this.schema = null;
             return this;
@@ -289,7 +289,7 @@ public class Action {
         map.put("name", name);
         map.put("description", description);
         if(schema != null) {
-            map.put("data", schema); // TODO better data
+            map.put("data", schema);
         }
 
         return map;

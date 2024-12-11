@@ -219,7 +219,7 @@ public class TicTacToe {
                 continue;
             }
 
-            Integer col = parseIntOrNull(vals[0]);
+            Integer col = parseIntOrNull(vals[1]);
             if (col == null || col <= 0 || col > 3) {
                 System.out.println("Wrong colum value");
                 continue;

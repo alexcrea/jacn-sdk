@@ -1,4 +1,6 @@
 import cn.lalaki.pub.BaseCentralPortalPlusExtension
+import groovy.util.Node
+import groovy.util.NodeList
 
 plugins {
     id("java")
@@ -9,7 +11,7 @@ plugins {
 }
 
 group = "xyz.alexcrea.jacn"
-version = "0.0.1"
+version = "0.0.3"
 
 repositories {
     mavenCentral()
@@ -19,7 +21,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:24.0.1")
 
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
 
     implementation("com.networknt:json-schema-validator:1.5.4")
 
@@ -117,6 +119,20 @@ publishing {
                 }
                 issueManagement {
                     url.set("https://github.com/${Meta.githubRepo}/issues")
+                }
+
+                withXml {
+                    val selfNode = asNode().get("dependencies") as NodeList
+                    selfNode.forEach { dependencies ->
+                        (dependencies as Node).children().forEach {
+                            val scope = ((it as Node).get("scope") as NodeList)[0] as Node
+
+                            if (scope.text() == "runtime") {
+                                scope.setValue("compile")
+                            }
+                        }
+                    }
+
                 }
             }
         }

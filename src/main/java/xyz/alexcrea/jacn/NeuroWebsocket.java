@@ -1,7 +1,9 @@
 package xyz.alexcrea.jacn;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.ValidationMessage;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
@@ -16,6 +18,7 @@ import java.net.ConnectException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -24,7 +27,7 @@ import java.util.function.Consumer;
 @ApiStatus.Internal
 public class NeuroWebsocket extends WebSocketClient {
 
-    private static final Gson gson = new Gson();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final @NotNull NeuroSDK parent;
 
@@ -106,7 +109,7 @@ public class NeuroWebsocket extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         try {
-            HashMap<?, ?> map = gson.fromJson(message, HashMap.class);
+            HashMap<?, ?> map = objectMapper.readValue(message, HashMap.class);
             if (map == null) {
                 sendInvalidFeedbackUnknownID(message, "Could not parse json: " +
                         "\nmessage: " + message);
@@ -122,7 +125,7 @@ public class NeuroWebsocket extends WebSocketClient {
 
             String command = commandObj.toString();
             if (!command.contentEquals("action")) {
-                if(command.contentEquals("actions/reregister_all")){
+                if (command.contentEquals("actions/reregister_all")) {
                     // We ignore it as Neuro do not have this action currently.
                     return;
                 }
@@ -143,7 +146,7 @@ public class NeuroWebsocket extends WebSocketClient {
             if (request == null) return;
 
             executeActionRequest(request);
-        } catch (JsonSyntaxException e) {
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
 
             sendInvalidFeedbackUnknownID(message, "Could not parse json. it is malformed: " + e.getMessage() +
@@ -200,12 +203,39 @@ public class NeuroWebsocket extends WebSocketClient {
             return null;
         }
 
-        // TODO json schema data (json schema response. nullable)
-        Object data = map.get("data");
-        String dataAsString = data == null ? null : data.toString();
-        System.out.println(dataAsString);
+        // Get data if exist
+        JsonNode dataNode;
+        if (action.getSchema() != null) {
+            Object data = map.get("data");
+            if (data == null) {
+                sendResult(new ActionResult(id, false, "Please provide a JSON schema"));
+                return null;
+            }
 
-        return new ActionRequest(action, name, dataAsString);
+            try {
+                dataNode = objectMapper.readTree(data.toString());
+            } catch (JsonProcessingException e) {
+                sendResult(new ActionResult(id, false, "Please provide a well formated JSON schema"));
+                return null;
+            }
+
+            // validate schema
+            Set<ValidationMessage> validations = action.getSchema().validate(dataNode);
+            if (!validations.isEmpty()) {
+                StringBuilder stb = new StringBuilder("Provided schema is not valid:");
+                for (ValidationMessage validation : validations) {
+                    stb.append("\n").append(validation.getMessage());
+                }
+
+                sendResult(new ActionResult(id, false, stb.toString()));
+                return null;
+            }
+
+        } else {
+            dataNode = null;
+        }
+
+        return new ActionRequest(action, name, dataNode);
     }
 
     @Nullable
@@ -272,7 +302,11 @@ public class NeuroWebsocket extends WebSocketClient {
             toSendMap.put("data", data);
         }
 
-        send(gson.toJson(toSendMap));
+        try {
+            send(objectMapper.writeValueAsString(toSendMap));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return true;
     }
 
