@@ -222,6 +222,8 @@ public class NeuroSDK {
     }
 
     public boolean internalRegisterActions(List<Action> actions) {
+        if(actions.isEmpty()) return true;
+
         registerLock.readLock().lock();
         List<Map<String, Object>> actionList = new ArrayList<>();
         for (Action action : actions) {
@@ -269,6 +271,7 @@ public class NeuroSDK {
      */
     public boolean unregisterActions(List<Action> actions) {
         if (!NeuroSDKState.CONNECTED.equals(this.state)) return false;
+        if(actions.isEmpty()) return true;
 
         registerLock.readLock().lock();
         List<String> actionNames = new ArrayList<>();
