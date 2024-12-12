@@ -299,6 +299,9 @@ public class Action {
         }
 
         URL resource = getClass().getClassLoader().getResource(resourcePath);
+        if(resource == null){
+            throw new IllegalArgumentException("Resource not found: " + resourcePath);
+        }
         try {
             return this.setSchemaFromURI(resource.toURI());
         } catch (URISyntaxException e) {

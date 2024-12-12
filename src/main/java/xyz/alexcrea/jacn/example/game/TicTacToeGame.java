@@ -1,14 +1,17 @@
 package xyz.alexcrea.jacn.example.game;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Just a normal tic-tac-toe game
+ */
 public class TicTacToeGame {
 
+    private volatile TicTacToeCaseState turn;
     private final TicTacToeCaseState[][] states;
 
     public TicTacToeGame() {
@@ -16,6 +19,8 @@ public class TicTacToeGame {
         for (int i = 0; i < 3; i++) {
             Arrays.fill(this.states[i], TicTacToeCaseState.EMPTY);
         }
+
+        this.turn = TicTacToeCaseState.PLAYER1;
     }
 
     @NotNull
@@ -31,6 +36,17 @@ public class TicTacToeGame {
         }
 
         return result;
+    }
+
+    public TicTacToeCaseState getTurn() {
+        return turn;
+    }
+
+    public void switchTurn() {
+        switch (this.turn) {
+            case PLAYER1 -> this.turn = TicTacToeCaseState.PLAYER2;
+            case PLAYER2 -> this.turn = TicTacToeCaseState.PLAYER1;
+        }
     }
 
     public boolean play(@NotNull TicTacToeLocation loc, @NotNull TicTacToeCaseState player) {
@@ -89,9 +105,11 @@ public class TicTacToeGame {
      *  O | O |
      *
      */
-    public @Nullable String gameState() {
+    public @NotNull String gameState(boolean prefixed) {
         StringBuilder stb = new StringBuilder();
-        stb.append("Tic Tac Toe current game state:");
+        if(prefixed){
+            stb.append("Tic Tac Toe current game state:");
+        }
 
         for (int row = 0; row < 3; row++) {
             stb.append('\n').append(this.states[row][0].getPlayerRepresentation());
@@ -103,4 +121,9 @@ public class TicTacToeGame {
 
         return stb.toString();
     }
+
+    public @NotNull String gameState() {
+        return gameState(true);
+    }
+
 }

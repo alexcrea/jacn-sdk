@@ -10,11 +10,15 @@ see [the installation guide](./INSTALL.md)
 
 ## List of things to do before this being usable:
 - [X] Make JSON schema
-- [X] Implement a better way to handle things 
-- [ ] Create example & docs of how to use the better way
+- [X] Implement a better way to handle things
+- [X] Create example how to use the better way
+- [ ] docs of how to use the better way
 
 ## Need help or suggestion ?
 You can either create an issue/pr/discussion here or join [my discord](https://discord.gg/swBrMf327a)
+
+Please note, since I plan to participate myself in the incoming neuro game jam I will not be actively 
+available for help in that period.
 
 ---
 

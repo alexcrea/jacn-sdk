@@ -1,4 +1,4 @@
-package xyz.alexcrea.jacn.example;
+package xyz.alexcrea.jacn.example.callback;
 
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.Contract;
@@ -18,10 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class TicTacToe {
+/**
+ * This is an example of how to use the neuro sdk with only callbacks.
+ * This example is currently dirty and should get a rewrite. it is recommended to see {@link xyz.alexcrea.jacn.example.listener.TicTacToeExample2} instead.
+ */
+public class TicTacToeExample1 {
 
     public static void main(String[] args) {
-        TicTacToe game = new TicTacToe();
+        TicTacToeExample1 game = new TicTacToeExample1();
 
         // Create the neuro SDK
         NeuroSDK sdk = new NeuroSDKBuilder("Tic Tac Toe")
@@ -37,13 +41,8 @@ public class TicTacToe {
 
     }
 
-    private TicTacToeCaseState currentPlayer;
     private final TicTacToeGame game = new TicTacToeGame();
     private volatile NeuroSDK sdk;
-
-    TicTacToe() {
-        currentPlayer = TicTacToeCaseState.PLAYER1;
-    }
 
     public void setSdk(NeuroSDK sdk) throws InterruptedException {
         this.sdk = sdk;
@@ -113,7 +112,7 @@ public class TicTacToe {
     }
 
     private boolean tryPlay(@NotNull TicTacToeLocation loc, @NotNull TicTacToeCaseState state) {
-        if (currentPlayer != state) {
+        if (game.getTurn() != state) {
             return false;
         }
 
@@ -132,10 +131,7 @@ public class TicTacToe {
         if (action != null) sdk.unregisterActions(action);
 
         // Set the other player turn
-        switch (state) {
-            case PLAYER1 -> currentPlayer = TicTacToeCaseState.PLAYER2;
-            case PLAYER2 -> currentPlayer = TicTacToeCaseState.PLAYER1;
-        }
+        game.switchTurn();
 
         return true;
     }
@@ -171,7 +167,6 @@ public class TicTacToe {
 
             try {
                 hasWon = neuroPlay(TicTacToeCaseState.PLAYER2);
-                System.out.println(game.gameState());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -201,7 +196,10 @@ public class TicTacToe {
         System.out.println(game.gameState());
 
         System.out.println("It is your turn. please input the row and collum as \"row collum\"");
-        return readCliPlay(sc, state);
+        boolean hasWon = readCliPlay(sc, state);
+        System.out.println(game.gameState(false));
+
+        return hasWon;
     }
 
     private boolean readCliPlay(@NotNull Scanner sc, @NotNull TicTacToeCaseState state) {
