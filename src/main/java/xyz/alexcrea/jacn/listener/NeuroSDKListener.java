@@ -3,8 +3,8 @@ package xyz.alexcrea.jacn.listener;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.alexcrea.jacn.NeuroSDK;
-import xyz.alexcrea.jacn.NeuroSDKState;
+import xyz.alexcrea.jacn.sdk.NeuroSDK;
+import xyz.alexcrea.jacn.sdk.NeuroSDKState;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
 
@@ -29,14 +29,6 @@ public interface NeuroSDKListener {
      */
     @Nullable
     NeuroSDK getSDK();
-
-    /**
-     * get the current Neuro SDK state.
-     *
-     * @return the current Neuro SDK state. CONNECTING if absent
-     */
-    @NotNull
-    NeuroSDKState getState();
 
     /**
      * Called when a handshake connection was done with a websocket.

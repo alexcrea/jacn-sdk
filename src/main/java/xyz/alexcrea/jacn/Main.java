@@ -3,6 +3,8 @@ package xyz.alexcrea.jacn;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import xyz.alexcrea.jacn.action.Action;
+import xyz.alexcrea.jacn.sdk.NeuroSDK;
+import xyz.alexcrea.jacn.sdk.NeuroSDKBuilder;
 
 import java.util.HashMap;
 

@@ -1,4 +1,4 @@
-package xyz.alexcrea.jacn;
+package xyz.alexcrea.jacn.sdk;
 
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NonBlocking;

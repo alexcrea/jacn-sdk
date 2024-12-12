@@ -4,18 +4,22 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.alexcrea.jacn.NeuroSDK;
+import xyz.alexcrea.jacn.action.Action;
+import xyz.alexcrea.jacn.sdk.NeuroSDK;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.sdk.NeuroSDKInterface;
+import xyz.alexcrea.jacn.sdk.NeuroSDKState;
 
 import java.net.ConnectException;
+import java.util.List;
 
 /**
  * An abstract implementation of a Neuro SDK Listener that implement basic sdk storage
  * and make
  */
 @SuppressWarnings({"unused"})
-public abstract class AbstractSDKListener implements NeuroSDKListener {
+public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKInterface {
 
     private NeuroSDK sdk;
 
@@ -127,6 +131,120 @@ public abstract class AbstractSDKListener implements NeuroSDKListener {
         if (exception instanceof ConnectException connectException) {
             onConnectError(connectException, this.sdk);
         }
+    }
+
+    @Override
+    public final @NotNull String getGameName() {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.getGameName();
+    }
+
+    @Override
+    public final @NotNull NeuroSDKState getState() {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.getState();
+    }
+
+    @Override
+    public final @Nullable Action getAction(@NotNull String name) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.getAction(name);
+    }
+
+    @Override
+    public final @NotNull List<Action> getActions(@NotNull List<String> names) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.getActions(names);
+    }
+
+    @Override
+    public final @NotNull List<Action> getActions(@NotNull String... names) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.getActions(names);
+    }
+
+    @Override
+    public final boolean sendContext(@NotNull String message, boolean silent) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.sendContext(message, silent);
+    }
+
+    @Override
+    public final boolean registerActions(List<Action> actions) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.registerActions(actions);
+    }
+
+    @Override
+    public final boolean registerActions(@NotNull Action... actions) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.registerActions(actions);
+    }
+
+    @Override
+    public final boolean unregisterActions(List<Action> actions) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.unregisterActions(actions);
+    }
+
+    @Override
+    public final boolean unregisterActions(@NotNull Action... actions) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.unregisterActions(actions);
+    }
+
+    @Override
+    public final boolean forceActions(@Nullable String state, @NotNull String query, boolean ephemeral, @NotNull List<Action> action) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(state, query, ephemeral, action);
+    }
+
+    @Override
+    public final boolean forceActions(@Nullable String state, @NotNull String query, boolean ephemeral, @NotNull Action... action) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(state, query, ephemeral, action);
+    }
+
+    @Override
+    public final boolean forceActions(@Nullable String state, @NotNull String query, @NotNull List<Action> action) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(state, query, action);
+    }
+
+    @Override
+    public final boolean forceActions(@Nullable String state, @NotNull String query, @NotNull Action... action) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(state, query, action);
+    }
+
+    @Override
+    public final boolean forceActions(@NotNull String query, boolean ephemeral, @NotNull List<Action> action) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(query, ephemeral, action);
+    }
+
+    @Override
+    public final boolean forceActions(@NotNull String query, boolean ephemeral, @NotNull Action... action) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(query, ephemeral, action);
+    }
+
+    @Override
+    public final boolean forceActions(@NotNull String query, @NotNull List<Action> action) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(query, action);
+    }
+
+    @Override
+    public final boolean forceActions(@NotNull String query, @NotNull Action... action) {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(query, action);
+    }
+
+    @Override
+    public final List<Action> getRegisteredActions() {
+        if(sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.getRegisteredActions();
     }
 
 }

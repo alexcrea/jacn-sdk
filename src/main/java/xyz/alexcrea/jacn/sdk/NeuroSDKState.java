@@ -1,4 +1,4 @@
-package xyz.alexcrea.jacn;
+package xyz.alexcrea.jacn.sdk;
 
 /**
  * Current state of the Neuro sdk
