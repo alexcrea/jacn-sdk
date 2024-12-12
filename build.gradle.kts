@@ -65,8 +65,8 @@ centralPortalPlus {
 
 object Meta {
     const val desc = "alexcrea's Java Neuro SDK API implementation"
-    const val license = "TBD" //TODO
-    const val licensePath = "TBD" //TODO
+    const val license = "MIT"
+    const val licensePath = "LICENSE.md"
     const val githubRepo = "alexcrea/JACN_SDK"
     const val release = "https://s01.oss.sonatype.org/service/local/"
     const val snapshot = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
