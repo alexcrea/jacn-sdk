@@ -17,7 +17,7 @@ import java.net.ConnectException;
 @SuppressWarnings({"unused"})
 public abstract class AbstractSDKListener implements NeuroSDKListener {
 
-    protected NeuroSDK sdk;
+    private NeuroSDK sdk;
 
     @Override
     @ApiStatus.Internal
@@ -104,7 +104,7 @@ public abstract class AbstractSDKListener implements NeuroSDKListener {
         if (this.sdk == null) return;
 
         int status = handshake.getHttpStatus();
-        if((status < 200 || status >= 300) && (status != 101)) {
+        if ((status < 200 || status >= 300) && (status != 101)) {
             onConnectFailed(handshake, this.sdk);
             return;
         }

@@ -221,7 +221,7 @@ public class NeuroSDK {
         ));
     }
 
-    public boolean internalRegisterActions(List<Action> actions) {
+    private boolean internalRegisterActions(List<Action> actions) {
         if(actions.isEmpty()) return true;
 
         registerLock.readLock().lock();

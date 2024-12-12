@@ -3,6 +3,7 @@ package xyz.alexcrea.jacn.action;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +39,7 @@ public class Action {
      *                    (e.g "join_friend_lobby", "use_item")
      * @param description A plaintext description of what this action does.
      *                    This information is directly received by Neuro.
-     * @param schema      the JSON schema to parse
+     * @param schema      a simple JSON schema to parse
      * @param onResult    action called when send by Neuro and successfully parsed.
      *                    please note:
      *                    <p>
@@ -107,7 +108,7 @@ public class Action {
      *                    (e.g "join_friend_lobby", "use_item")
      * @param description A plaintext description of what this action does.
      *                    This information is directly received by Neuro.
-     * @param schema      the JSON schema to parse
+     * @param schema      a simple JSON schema to parse to receive response from neuro
      */
     public Action(@NotNull String name,
                   @NotNull String description,
@@ -244,7 +245,8 @@ public class Action {
             JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012);
 
     /**
-     * Get the JSON schema of this action.
+     * Get the simple JSON schema of this action.
+     *
      * @return the json schema.
      */
     public @Nullable JsonSchema getSchema() {
@@ -252,14 +254,14 @@ public class Action {
     }
 
     /**
-     * Set the JSON schema from a document present on the URI location.
+     * Set a simple JSON schema from a document present on the URI location.
      *
-     * @param uri the schema location
+     * @param uri the simple JSON schema location
      * @return this
      */
     @NotNull
     public Action setSchemaFromURI(@Nullable URI uri) {
-        if(uri == null) {
+        if (uri == null) {
             this.schema = null;
             return this;
         }
@@ -269,14 +271,14 @@ public class Action {
     }
 
     /**
-     * Set the JSON schema from a document present on the URI location.
+     * Set a simple JSON schema from a document present on the URI location.
      *
-     * @param uri the schema location
+     * @param uri the simple JSON schema location
      * @return this
      */
     @NotNull
     public Action setSchemaFromURI(@Nullable String uri) {
-        if(uri == null) {
+        if (uri == null) {
             this.schema = null;
             return this;
         }
@@ -284,6 +286,12 @@ public class Action {
         return setSchemaFromURI(URI.create(uri));
     }
 
+    /**
+     * Set the simple JSON schema from a restore file.
+     *
+     * @param resourcePath the path to the resource file
+     * @return this
+     */
     public @NotNull Action setSchemaFromResource(@Nullable String resourcePath) {
         if (resourcePath == null) {
             this.schema = null;
@@ -299,8 +307,9 @@ public class Action {
     }
 
     /**
-     * Set the expected JsonSchema
-     * @param schema the json schema to validate
+     * Set the expected simple JSON Schema
+     *
+     * @param schema the simple JSON schema to validate
      * @return this
      */
     @NotNull
@@ -310,13 +319,14 @@ public class Action {
     }
 
     /**
-     * Set the expected JsonSchema from raw string
-     * @param rawSchema the json schema to validate as a plain string
+     * Set the expected simple JSON Schema from raw string
+     *
+     * @param rawSchema the simple JSON schema to validate as a plain string
      * @return this
      */
     @NotNull
     public Action setSchemaRaw(@Nullable String rawSchema) {
-        if(rawSchema == null) {
+        if (rawSchema == null) {
             this.schema = null;
             return this;
         }
@@ -326,14 +336,16 @@ public class Action {
     }
 
     /**
-     * Return as a map object that will be sent to Neuro
+     * Return as a map of object that will be sent as json to Neuro
+     *
      * @return the map object representing this action
      */
+    @ApiStatus.Internal
     public Map<String, Object> asMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);
         map.put("description", description);
-        if(schema != null) {
+        if (schema != null) {
             map.put("schema", schema.getSchemaNode());
         }
 

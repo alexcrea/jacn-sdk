@@ -69,11 +69,13 @@ public interface NeuroSDKListener {
      * This function is, probably, only called from the websocket thread.
      * <p>
      * This function should return a result ASAP as Neuro will freeze until a result is provided.
+     * An action may be triggered anytime. even if not requested by force action.
      * <p>
      * This function return a non-null value, it will stop other listener to process this action request.
      * If no listener return a non-null value, then it will be considered as a failed action request.
      *
-     * @param sdk the Neuro SDK
+     * @param request the requested action
+     * @param sdk     the Neuro SDK
      * @return The resulting action result.
      * or null if the listener do not handle this Action Request
      */
