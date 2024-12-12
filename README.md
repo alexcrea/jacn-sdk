@@ -14,6 +14,10 @@ see [the installation guide](./INSTALL.md)
 - [X] Create example how to use the better way
 - [ ] docs of how to use the better way
 
+### And some detail
+- [ ] move example to a module excluded from gradle publish
+- [ ] rethink default sdk event callbacks
+
 ## Need help or suggestion ?
 You can either create an issue/pr/discussion here or join [my discord](https://discord.gg/swBrMf327a)
 

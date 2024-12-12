@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "xyz.alexcrea.jacn"
-version = "0.0.3"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -49,6 +49,13 @@ val javadocJar by tasks.creating(Jar::class) {
 // ------------------------------------
 // PUBLISHING TO SONATYPE CONFIGURATION
 // ------------------------------------
+
+signing {
+    useGpgCmd()
+    val extension = extensions
+        .getByName("publishing") as PublishingExtension
+    sign(extension.publications)
+}
 
 // The path is recommended to be set to an empty directory
 val localMavenRepo = uri(
