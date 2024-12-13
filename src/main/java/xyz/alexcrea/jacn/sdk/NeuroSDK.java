@@ -10,7 +10,10 @@ import xyz.alexcrea.jacn.action.Action;
 
 import java.net.ConnectException;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -182,7 +185,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     private boolean internalRegisterActions(List<Action> actions) {
-        if(actions.isEmpty()) return true;
+        if (actions.isEmpty()) return true;
 
         registerLock.readLock().lock();
         List<Map<String, Object>> actionList = new ArrayList<>();
@@ -211,7 +214,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     @Override
     public boolean unregisterActions(List<Action> actions) {
         if (!NeuroSDKState.CONNECTED.equals(this.state)) return false;
-        if(actions.isEmpty()) return true;
+        if (actions.isEmpty()) return true;
 
         registerLock.readLock().lock();
         List<String> actionNames = new ArrayList<>();
@@ -254,54 +257,54 @@ public class NeuroSDK implements NeuroSDKInterface {
             @Nullable String state,
             @NotNull String query,
             boolean ephemeral,
-            @NotNull Action... action) {
-        return forceActions(state, query, ephemeral, List.of(action));
+            @NotNull Action... actions) {
+        return forceActions(state, query, ephemeral, List.of(actions));
     }
 
     @Override
     public boolean forceActions(
             @Nullable String state,
             @NotNull String query,
-            @NotNull List<Action> action) {
-        return forceActions(state, query, false, action);
+            @NotNull List<Action> actions) {
+        return forceActions(state, query, false, actions);
     }
 
     @Override
     public boolean forceActions(
             @Nullable String state,
             @NotNull String query,
-            @NotNull Action... action) {
-        return forceActions(state, query, List.of(action));
+            @NotNull Action... actions) {
+        return forceActions(state, query, List.of(actions));
     }
 
     @Override
     public boolean forceActions(
             @NotNull String query,
             boolean ephemeral,
-            @NotNull List<Action> action) {
-        return forceActions(null, query, ephemeral, action);
+            @NotNull List<Action> actions) {
+        return forceActions(null, query, ephemeral, actions);
     }
 
     @Override
     public boolean forceActions(
             @NotNull String query,
             boolean ephemeral,
-            @NotNull Action... action) {
-        return forceActions(query, ephemeral, List.of(action));
+            @NotNull Action... actions) {
+        return forceActions(query, ephemeral, List.of(actions));
     }
 
     @Override
     public boolean forceActions(
             @NotNull String query,
-            @NotNull List<Action> action) {
-        return forceActions(query, false, action);
+            @NotNull List<Action> actions) {
+        return forceActions(query, false, actions);
     }
 
     @Override
     public boolean forceActions(
             @NotNull String query,
-            @NotNull Action... action) {
-        return forceActions(query, List.of(action));
+            @NotNull Action... actions) {
+        return forceActions(query, List.of(actions));
     }
 
     @Override
@@ -312,10 +315,11 @@ public class NeuroSDK implements NeuroSDKInterface {
 
     /**
      * Gracefully close the websocket
+     *
      * @param reason Reason of why the sdk is closed
      */
-    public void close(String reason){
-        if(this.state == NeuroSDKState.CONNECTED){
+    public void close(String reason) {
+        if (this.state == NeuroSDKState.CONNECTED) {
             this.onClose(reason);
         }
 
@@ -326,7 +330,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     /**
      * Gracefully close the websocket
      */
-    public void close(){
+    public void close() {
         close("Shutdown");
     }
 
