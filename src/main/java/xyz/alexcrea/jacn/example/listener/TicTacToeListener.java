@@ -8,6 +8,7 @@ import xyz.alexcrea.jacn.action.ActionResult;
 import xyz.alexcrea.jacn.example.game.TicTacToeCaseState;
 import xyz.alexcrea.jacn.example.game.TicTacToeGame;
 import xyz.alexcrea.jacn.example.game.TicTacToeLocation;
+import xyz.alexcrea.jacn.example.game.TicTacToeUtil;
 import xyz.alexcrea.jacn.listener.AbstractSDKListener;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 
@@ -105,7 +106,7 @@ public class TicTacToeListener extends AbstractSDKListener {
             }
 
             // Finally, we play
-            if (!TicTacToeExample2.tryPlay(game, sdk, location, TicTacToeCaseState.PLAYER2)) {
+            if (!TicTacToeUtil.tryPlay(game, sdk, location, TicTacToeCaseState.PLAYER2)) {
                 // We do not want Neuro to retry to action so we send a success even if it failed
                 return new ActionResult(request, true, null);
             }
