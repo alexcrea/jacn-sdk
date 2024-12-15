@@ -38,7 +38,8 @@ public class NeuroSDKBuilder {
     /**
      * Create a new builder for
      * <p>
-     * Default builder has localhost as address and 42 as port.
+     * Default builder has localhost as address and 8000 as port.
+     * But will use environment variable if exist and no address is provided.
      * It also log error to system err on connect and print stacktrace on error.
      * No default action is prepared to be registered by default
      *
