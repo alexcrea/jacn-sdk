@@ -104,10 +104,12 @@ public class NeuroWebsocket extends WebSocketClient {
     private void executeActionRequest(@NotNull ActionRequest request) {
         // Do Action and get result
         ActionResult result = null;
+        boolean fromCallback = false;
         try {
             Function<@NotNull ActionRequest, @Nullable ActionResult> onResult = request.from().getOnResult();
             if (onResult != null) {
                 result = request.from().getOnResult().apply(request);
+                fromCallback = true;
             }
 
         } catch (Exception e) {
@@ -116,12 +118,16 @@ public class NeuroWebsocket extends WebSocketClient {
             return;
         }
 
-        if (result == null) {
+        NeuroSDKListener resultingListener = null;
+        if (!fromCallback) {
             // Execute on listeners
             for (NeuroSDKListener listener : listeners) {
                 try {
                     result = listener.onActionRequest(request, this.parent);
-                    if (result != null) break;
+                    if (result != null) {
+                        resultingListener = listener;
+                        break;
+                    }
                 } catch (Exception e) {
                     actionExecuteFailed(request, "Exception thrown while executing the request on a listener: " + e.getMessage());
                     e.printStackTrace();
@@ -140,11 +146,15 @@ public class NeuroWebsocket extends WebSocketClient {
 
         // Do after result
         try {
-            BiConsumer<ActionRequest, ActionResult> onResult = request.from().getAfterResult();
-
-            if (onResult != null) {
-                onResult.accept(request, result);
+            if (fromCallback) {
+                BiConsumer<ActionRequest, ActionResult> onResult = request.from().getAfterResult();
+                if (onResult != null) {
+                    onResult.accept(request, result);
+                }
+            } else {
+                resultingListener.onAfterResult(request, result, this.parent);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

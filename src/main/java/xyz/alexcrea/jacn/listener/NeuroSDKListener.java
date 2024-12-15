@@ -3,10 +3,9 @@ package xyz.alexcrea.jacn.listener;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import xyz.alexcrea.jacn.sdk.NeuroSDK;
-import xyz.alexcrea.jacn.sdk.NeuroSDKState;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.sdk.NeuroSDK;
 
 /**
  * Represent a listener to even on the Neuro SDK
@@ -65,6 +64,8 @@ public interface NeuroSDKListener {
      * <p>
      * This function return a non-null value, it will stop other listener to process this action request.
      * If no listener return a non-null value, then it will be considered as a failed action request.
+     * <p>
+     * If you need to execute something that take more time after returned the result. see {@link #onAfterResult}
      *
      * @param request the requested action
      * @param sdk     the Neuro SDK
@@ -73,5 +74,15 @@ public interface NeuroSDKListener {
      */
     @Nullable
     ActionResult onActionRequest(@NotNull ActionRequest request, @NotNull NeuroSDK sdk);
+
+    /**
+     * Called after {@link #onActionRequest} returned a non-null result.
+     * This function is, probably, only called from the websocket thread.
+     *
+     * @param request the requested action
+     * @param result  the returned result
+     * @param sdk     the Neuro SDK
+     */
+    void onAfterResult(@NotNull ActionRequest request, @NotNull ActionResult result, @NotNull NeuroSDK sdk);
 
 }

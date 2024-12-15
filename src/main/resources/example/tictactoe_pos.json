@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Tic tac toe position",
   "description": "define a position of a tic tac toe case",
   "type": "object",

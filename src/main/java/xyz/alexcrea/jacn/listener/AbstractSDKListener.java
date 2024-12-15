@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * An abstract implementation of a Neuro SDK Listener that implement basic sdk storage
- * and make
+ * and also allow to call sdk function from here
  */
 @SuppressWarnings({"unused"})
 public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKInterface {
@@ -37,11 +37,15 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
         return this.sdk;
     }
 
-
     @Override
     public @Nullable ActionResult onActionRequest(@NotNull ActionRequest request, @NotNull NeuroSDK sdk) {
-        // Empty but let other override it.
+        // Empty but let it be overridden
         return null;
+    }
+
+    @Override
+    public void onAfterResult(@NotNull ActionRequest request, @NotNull ActionResult result, @NotNull NeuroSDK sdk) {
+        // Empty but let it be overridden
     }
 
     /**

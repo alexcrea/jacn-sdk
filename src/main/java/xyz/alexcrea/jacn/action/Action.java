@@ -185,7 +185,7 @@ public class Action {
     }
 
     /**
-     * Get the consumer called after result returned, not null and not exception thrown.
+     * Get the consumer called after non-null result is returned by the {@link #setOnResult onResult} callback.
      * <p>
      * Will be called on the same thread as {@link #setOnResult onResult} function.
      *
@@ -196,7 +196,7 @@ public class Action {
     }
 
     /**
-     * Set the consumer called after result returned, not null and not exception thrown.
+     * Set the consumer called after non-null result is returned by the {@link #setOnResult onResult} callback.
      * <p>
      * Will be called on the same thread as {@link #setOnResult onResult} function.
      *

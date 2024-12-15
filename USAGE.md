@@ -153,7 +153,7 @@ If onResult return null, The action will be processed by listeners if any.
 If the callback is or return null and every listener returned null, then the action is considered failed.
 
 Please note that if you are using callback and listeners,
-afterResult callback can be called even if onResult is or returned null.
+afterResult callback will be called only if the result was provided by onResult callback.
 
 ## Listeners
 
