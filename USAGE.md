@@ -27,7 +27,7 @@ NeuroSDK sdk = builder.build();
 ```
 Building the NeuroSDK will cause it to try to connect to a websocket either:
 - The provided address and port
-- The url provided at the "NEURO_SDK_WS_URL" environment variable (not yet implemented)
+- The url provided at the "NEURO_SDK_WS_URL" environment variable
 - The default address (localhost) and port (8000)
 
 Building the NeuroSDK is not blocking. The SDK will NOT be open after build is called.
@@ -99,7 +99,7 @@ It can be any format (plaintext, JSON, XML, YAML, Markdown, etc...)
 ### Sending Context
 You can send context to Neuro when something on your game happen with
 ```java
-sdk.sendContext("message", silent (bool));
+sdk.sendContext(message, silent (bool));
 ```
 
 with the message field being the message Neuro will directly receive. \

@@ -17,7 +17,7 @@ see [the installation guide](./INSTALL.md)
 ### And some detail
 - [ ] move example to a module excluded from gradle publish
 - [ ] rethink default sdk event callbacks
-- [ ] get adressed by environment variable if it exist
+- [X] get address by environment variable if exist
 - [ ] verify action result status and make sure everything is ok in the example and sdk (some parts may be too precautious and neuro may be more safe than expected)
 
 ## Need help or suggestion ?

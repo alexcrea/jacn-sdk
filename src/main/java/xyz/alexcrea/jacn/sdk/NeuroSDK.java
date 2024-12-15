@@ -48,8 +48,17 @@ public class NeuroSDK implements NeuroSDKInterface {
         this.registerLock = new ReentrantReadWriteLock();
         this.registeredActions = new HashMap<>();
 
+        // Try to find the websocket address
+        String env_address = System.getenv("NEURO_SDK_WS_URL");
+
+        URI uri;
+        if (builder.hasAddress() || env_address == null) {
+            uri = URI.create("ws://" + builder.getAddress() + ":" + builder.getPort());
+        } else {
+            uri = URI.create(env_address);
+        }
+
         // create and connected the websocket
-        URI uri = URI.create("ws://" + builder.getAddress() + ":" + builder.getPort());
         this.websocket = new NeuroWebsocket(uri, this, builder,
                 this::onConnect, this::onClose, this::onConnectError);
 

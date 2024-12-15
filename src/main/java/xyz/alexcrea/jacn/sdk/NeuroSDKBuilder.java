@@ -3,6 +3,7 @@ package xyz.alexcrea.jacn.sdk;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.error.WebsocketException;
 import xyz.alexcrea.jacn.listener.NeuroSDKListener;
@@ -23,8 +24,8 @@ public class NeuroSDKBuilder {
 
     private @NotNull String gameName;
 
-    private String address = DEFAULT_ADDRESS;
-    private short port = DEFAULT_PORT;
+    private @Nullable String address = null;
+    private @Nullable Short port = null;
 
     private Consumer<ServerHandshake> onConnect;
     private Consumer<String> onClose;
@@ -51,7 +52,7 @@ public class NeuroSDKBuilder {
 
         this.onConnect = handshake -> {
             short status = handshake.getHttpStatus();
-            if(status == 101) return;
+            if (status == 101) return;
 
             if (status < 200 || status >= 300) {
                 System.err.println("Got error while connecting to the websocket: " +
@@ -63,7 +64,7 @@ public class NeuroSDKBuilder {
             System.out.println("Closed: " + string);
         };
         this.onError = error -> {
-            if(error instanceof ConnectException) {
+            if (error instanceof ConnectException) {
                 System.err.println("Error connecting to the websocket");
                 System.err.println("Is Neuro or Randy open ?");
                 return;
@@ -86,6 +87,7 @@ public class NeuroSDKBuilder {
      * @param onOpen the consumer to execute on open
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder setOnConnect(@NotNull Consumer<ServerHandshake> onOpen) {
         this.onConnect = onOpen;
         return this;
@@ -100,6 +102,7 @@ public class NeuroSDKBuilder {
      * @param onClose the consumer to execute on open
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder setOnClose(@NotNull Consumer<String> onClose) {
         this.onClose = onClose;
         return this;
@@ -112,6 +115,7 @@ public class NeuroSDKBuilder {
      * @param onError the consumer to execute on error
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder setOnError(@NotNull Consumer<Exception> onError) {
         this.onError = onError;
         return this;
@@ -125,6 +129,7 @@ public class NeuroSDKBuilder {
      * @param actions the list of actions to get registered
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder setActionsOnConnect(@NotNull List<Action> actions) {
         this.actionList = new ArrayList<>(actions);
         return this;
@@ -138,6 +143,7 @@ public class NeuroSDKBuilder {
      * @param actions the list of actions to get registered
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder setActionsOnConnect(@NotNull Action... actions) {
         return setActionsOnConnect(List.of(actions));
     }
@@ -150,6 +156,7 @@ public class NeuroSDKBuilder {
      * @param actions the list of actions to get registered
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder addActionsOnConnect(@NotNull List<Action> actions) {
         this.actionList.addAll(actions);
         return this;
@@ -163,6 +170,7 @@ public class NeuroSDKBuilder {
      * @param actions the list of actions to get registered
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder addActionsOnConnect(@NotNull Action... actions) {
         return addActionsOnConnect(List.of(actions));
     }
@@ -173,7 +181,8 @@ public class NeuroSDKBuilder {
      * @param port the webserver port
      * @return this
      */
-    public NeuroSDKBuilder setPort(short port) {
+    @NotNull
+    public NeuroSDKBuilder setPort(@Nullable Short port) {
         this.port = port;
         return this;
     }
@@ -184,6 +193,7 @@ public class NeuroSDKBuilder {
      * @param address the websocket address
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder setAddress(String address) {
         this.address = address;
         return this;
@@ -196,7 +206,16 @@ public class NeuroSDKBuilder {
      */
     @NotNull
     public String getAddress() {
-        return address;
+        return address != null ? address : DEFAULT_ADDRESS;
+    }
+
+    /**
+     * Get if a custom address was set
+     *
+     * @return if a custom address was set
+     */
+    public boolean hasAddress() {
+        return address != null;
     }
 
     /**
@@ -205,7 +224,7 @@ public class NeuroSDKBuilder {
      * @return the webserver port
      */
     public short getPort() {
-        return port;
+        return port != null ? port : DEFAULT_PORT;
     }
 
     /**
@@ -275,6 +294,7 @@ public class NeuroSDKBuilder {
      * @param gameName the game name
      * @return this
      */
+    @NotNull
     public NeuroSDKBuilder setGameName(@NotNull String gameName) {
         this.gameName = gameName;
         return this;
@@ -282,6 +302,7 @@ public class NeuroSDKBuilder {
 
     /**
      * Get the list of SDK listener of this builder
+     *
      * @return the list of SDK Listeners
      */
     @NotNull
@@ -291,6 +312,7 @@ public class NeuroSDKBuilder {
 
     /**
      * Set the list of SDK listeners for this builder
+     *
      * @param listeners the list of SDK listener
      * @return this
      */
@@ -302,6 +324,7 @@ public class NeuroSDKBuilder {
 
     /**
      * Add listeners to the current of listeners.
+     *
      * @param listeners the listeners to add
      * @return this
      */
