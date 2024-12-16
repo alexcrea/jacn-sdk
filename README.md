@@ -19,7 +19,7 @@ see [the installation guide](./INSTALL.md)
 - [ ] rethink default sdk event callbacks
 - [X] get address by environment variable if exist
 - [ ] verify action result status and make sure everything is ok in the example and sdk (some parts may be too precautious and neuro may be more safe than expected)
-
+- [ ] add some proposed feature 
 ## Need help or suggestion ?
 You can either create an issue/pr/discussion here or join [my discord](https://discord.gg/swBrMf327a)
 
@@ -30,5 +30,5 @@ available for help in that period.
 
 ### Credit
 This implementation use [com.networknt:json-schema-validator](https://github.com/networknt/json-schema-validator)
-for JSON schema validation
+for JSON schema validation \
 and [org.java-websocket:Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) for the websocket

@@ -2,6 +2,7 @@ package xyz.alexcrea.jacn.example.listener;
 
 import org.jetbrains.annotations.NotNull;
 import xyz.alexcrea.jacn.action.Action;
+import xyz.alexcrea.jacn.action.OptionMapAction;
 import xyz.alexcrea.jacn.example.game.TicTacToeCaseState;
 import xyz.alexcrea.jacn.example.game.TicTacToeGame;
 import xyz.alexcrea.jacn.example.game.TicTacToeLocation;
@@ -86,19 +87,17 @@ public class TicTacToeExample2 {
         while (!hasWin) {
             // Check at least 1 empty location remaining to play
             List<TicTacToeLocation> possibleLocations = game.getValidLocations();
-            if (possibleLocations.isEmpty()) break; // End by tie
+            if (possibleLocations.isEmpty()) break; // End by tie if break
 
             // CLI play
             hasWin = TicTacToeUtil.cliPlay(game, sdk, sc, TicTacToeCaseState.PLAYER1);
             if (hasWin) break;
 
-            sdk.sendContext("Player " + TicTacToeCaseState.PLAYER1.getPlayerRepresentation() + " just played ", true);
-
             // Check at least 1 empty location remaining to play
             possibleLocations = game.getValidLocations();
-            if (possibleLocations.isEmpty()) break; // End by tie
+            if (possibleLocations.isEmpty()) break; // End by tie if break
 
-            hasWin = forceNeuroPlay(game, sdk, play);
+            hasWin = forceNeuroPlay(game, possibleLocations, sdk);
 
             // We just wait for a very small amount of time to let potential other Neuro action trying to synchronise discover it's not there turn
             // (it allow then to synchronise with game object)
@@ -134,16 +133,29 @@ public class TicTacToeExample2 {
     /**
      * Send a force action to let neuro play and wait for her play.
      *
-     * @param game the tic-tac-toe game
-     * @param sdk  the neuro sdk
+     * @param game              the tic-tac-toe game
+     * @param possibleLocations list of possible location neuro can play
+     * @param sdk               the neuro sdk
      * @return If the play of neuro resulted in a win.
      * @throws InterruptedException cause by wait on game
      */
-    private static boolean forceNeuroPlay(@NotNull TicTacToeGame game, @NotNull NeuroSDK sdk, @NotNull Action playAction) throws InterruptedException {
+    private static boolean forceNeuroPlay(@NotNull TicTacToeGame game,
+                                          @NotNull List<TicTacToeLocation> possibleLocations,
+                                          @NotNull NeuroSDK sdk) throws InterruptedException {
         // Check Neuro's turn obviously
         if (game.getTurn() != TicTacToeCaseState.PLAYER2) {
             System.err.println("It is not Neuro's turn.");
             return false;
+        }
+
+        // Create option action
+        OptionMapAction<TicTacToeLocation> playAction = new OptionMapAction<>(
+                "play",
+                "Play a position in the tic tac toe grid.",
+                "Tic Tac Toe position",
+                "Selected legal location for a tic tac toe game");
+        for (TicTacToeLocation loc : possibleLocations) {
+            playAction.setOption(loc.actionName(), loc);
         }
 
         // Register and force play action
@@ -152,7 +164,8 @@ public class TicTacToeExample2 {
             return false;
         }
         if (!sdk.forceActions(game.gameState(), "It is your turn. please play on a empty tic-tac-toe case.", playAction)) {
-            System.err.println("Could send force play action");
+            System.err.println("Could not send send force play action");
+            return false;
         }
 
         // Wait for neuro to play.

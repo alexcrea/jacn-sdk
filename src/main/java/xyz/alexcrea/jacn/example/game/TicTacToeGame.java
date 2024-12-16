@@ -50,7 +50,7 @@ public class TicTacToeGame {
     }
 
     public boolean play(@NotNull TicTacToeLocation loc, @NotNull TicTacToeCaseState player) {
-        this.states[loc.row()][loc.col()] = player;
+        this.states[loc.row()][loc.column()] = player;
 
         return hasWon();
     }
@@ -93,7 +93,7 @@ public class TicTacToeGame {
 
 
     public TicTacToeCaseState getState(@NotNull TicTacToeLocation loc) {
-        return this.states[loc.row()][loc.col()];
+        return this.states[loc.row()][loc.column()];
     }
 
     /*

@@ -102,7 +102,7 @@ public class TicTacToeExample1 {
 
             // And say neuro she could play
             return new ActionResult(request, true, "You just played on " +
-                    "row " + (loc.row() + 1) + " and column " + (loc.col() + 1));
+                    "row " + (loc.row() + 1) + " and column " + (loc.column() + 1));
         } else {
             // And neuro could not play
             return new ActionResult(request, false, "It is not your turn");

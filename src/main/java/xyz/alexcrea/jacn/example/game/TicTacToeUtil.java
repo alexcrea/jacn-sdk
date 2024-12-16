@@ -26,7 +26,7 @@ public class TicTacToeUtil {
                                   @NotNull Scanner sc, @NotNull TicTacToeCaseState state) {
         System.out.println(game.gameState());
 
-        System.out.println("It is your turn. please input the row and collum as \"row collum\"");
+        System.out.println("It is your turn. please input the row and column as \"row column\"");
         boolean hasWon = readCliPlay(game, sdk, sc, state);
         System.out.println(game.gameState(false));
 
@@ -74,6 +74,8 @@ public class TicTacToeUtil {
                 System.out.println("It is not your turn ? somehow ?");
                 return false;
             }
+            sdk.sendContext("Player " + TicTacToeCaseState.PLAYER1.getPlayerRepresentation() + " just played " +
+                    "row " + (loc.row() + 1) + " column " + (loc.column() + 1), true);
 
             return game.hasWon();
         }

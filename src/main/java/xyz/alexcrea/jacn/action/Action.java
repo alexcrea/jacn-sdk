@@ -1,5 +1,6 @@
 package xyz.alexcrea.jacn.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
@@ -96,7 +97,7 @@ public class Action {
      */
     public Action(@NotNull String name,
                   @NotNull String description,
-                  @NotNull Function<@NotNull ActionRequest, ActionResult> onResult) {
+                  @Nullable Function<@NotNull ActionRequest, ActionResult> onResult) {
         this(name, description, null, onResult);
     }
 
@@ -318,6 +319,24 @@ public class Action {
     @NotNull
     public Action setSchema(@Nullable JsonSchema schema) {
         this.schema = schema;
+        return this;
+    }
+
+
+    /**
+     * Set the expected simple JSON Schema
+     *
+     * @param schema the simple JSON schema to validate
+     * @return this
+     */
+    @NotNull
+    public Action setSchema(@Nullable JsonNode schema) {
+        if (schema == null) {
+            this.schema = null;
+            return this;
+        }
+
+        this.schema = jsonSchemaFactory.getSchema(schema);
         return this;
     }
 

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.action.OptionMapAction;
 import xyz.alexcrea.jacn.example.game.TicTacToeCaseState;
 import xyz.alexcrea.jacn.example.game.TicTacToeGame;
 import xyz.alexcrea.jacn.example.game.TicTacToeLocation;
@@ -73,6 +74,14 @@ public class TicTacToeListener extends AbstractSDKListener {
     @Override
     public @Nullable ActionResult onActionRequest(@NotNull ActionRequest request, @NotNull NeuroSDK sdk) {
         if (!request.from().getName().contentEquals("play")) return null;
+        // We know we created an option action like this when we register a "play" action
+        OptionMapAction<TicTacToeLocation> action = (OptionMapAction<TicTacToeLocation>) request.from();
+
+        // Fetch location from data of request
+        TicTacToeLocation location = action.get(request);
+        if(location == null) {
+            return new ActionResult(request, false, "Could not find played location from JSON schema");
+        }
 
         if (game.getTurn() != TicTacToeCaseState.PLAYER2) {
             // We do not want Neuro to retry to action so we send a success even if it failed
@@ -87,11 +96,6 @@ public class TicTacToeListener extends AbstractSDKListener {
                 return new ActionResult(request, true, null);
             }
 
-            // Fetch location from data
-            int row = request.data().get("row").asInt() - 1;
-            int column = request.data().get("column").asInt() - 1;
-            TicTacToeLocation location = new TicTacToeLocation(row, column);
-
             // Check location is available
             TicTacToeCaseState current = game.getState(location);
             if (current != TicTacToeCaseState.EMPTY) {
@@ -101,7 +105,7 @@ public class TicTacToeListener extends AbstractSDKListener {
                 // THIS SHOULD BE DELETED AS FAST AS IT IS FIXED
                 sdk.forceActions("ONLY FOR RANDY.", request.from());
 
-                return new ActionResult(request, false, "This case (row: " + (row + 1) + ", column: " + (column + 1) + ") " +
+                return new ActionResult(request, false, "This case (row: " + (location.row() + 1) + ", column: " + (location.column() + 1) + ") " +
                         "is already occupied by player " + current.getPlayerRepresentation());
             }
 
@@ -118,7 +122,7 @@ public class TicTacToeListener extends AbstractSDKListener {
             game.notify();
 
             return new ActionResult(request, true, "You just played on " +
-                    "row " + (row + 1) + " and column " + (column + 1));
+                    "row " + (location.row() + 1) + " and column " + (location.column() + 1));
         }
     }
 
