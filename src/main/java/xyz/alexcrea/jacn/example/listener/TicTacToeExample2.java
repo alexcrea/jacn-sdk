@@ -80,10 +80,6 @@ public class TicTacToeExample2 {
         boolean hasWin = false;
         Scanner sc = new Scanner(System.in);
 
-        // Instantiate the play action
-        Action play = new Action("play", "Play a position in the tic tac toe grid.");
-        play.setSchemaFromResource("example/tictactoe_pos.json");
-
         while (!hasWin) {
             // Check at least 1 empty location remaining to play
             List<TicTacToeLocation> possibleLocations = game.getValidLocations();
@@ -151,9 +147,7 @@ public class TicTacToeExample2 {
         // Create option action
         OptionMapAction<TicTacToeLocation> playAction = new OptionMapAction<>(
                 "play",
-                "Play a position in the tic tac toe grid.",
-                "Tic Tac Toe position",
-                "Selected legal location for a tic tac toe game");
+                "Play a position in the tic tac toe grid.");
         for (TicTacToeLocation loc : possibleLocations) {
             playAction.setOption(loc.actionName(), loc);
         }
