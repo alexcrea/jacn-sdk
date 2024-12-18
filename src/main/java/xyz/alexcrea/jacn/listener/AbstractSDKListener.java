@@ -10,6 +10,7 @@ import xyz.alexcrea.jacn.action.ActionResult;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 import xyz.alexcrea.jacn.sdk.NeuroSDKInterface;
 import xyz.alexcrea.jacn.sdk.NeuroSDKState;
+import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
 
 import java.net.ConnectException;
 import java.util.List;
@@ -249,6 +250,12 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     public final List<Action> getRegisteredActions() {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.getRegisteredActions();
+    }
+
+    @Override
+    public boolean isEnable(@NotNull ProposedFeature feature) {
+        if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.isEnable(feature);
     }
 
 }

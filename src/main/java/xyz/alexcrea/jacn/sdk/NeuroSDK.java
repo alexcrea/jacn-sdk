@@ -2,18 +2,17 @@ package xyz.alexcrea.jacn.sdk;
 
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.NeuroWebsocket;
 import xyz.alexcrea.jacn.action.Action;
+import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
 
 import java.net.ConnectException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -33,6 +32,8 @@ public class NeuroSDK implements NeuroSDKInterface {
     private final ReentrantReadWriteLock registerLock;
     private final HashMap<String, Action> registeredActions;
 
+    private final Set<ProposedFeature> enabledFeatures;
+
     /**
      * Create and connect to Neuro sdk websocket via a builder
      *
@@ -47,6 +48,8 @@ public class NeuroSDK implements NeuroSDKInterface {
 
         this.registerLock = new ReentrantReadWriteLock();
         this.registeredActions = new HashMap<>();
+
+        this.enabledFeatures = builder.getProposed();
 
         // Try to find the websocket address
         String env_address = System.getenv("NEURO_SDK_WS_URL");
@@ -209,6 +212,25 @@ public class NeuroSDK implements NeuroSDKInterface {
         return websocket.sendCommand("actions/register", Map.of("actions", actionList), true);
     }
 
+    /**
+     * DO NOT USE THIS METHOD INTERNAL ONLY.
+     * INTENDED USE IS FOR {@link ProposedFeature#RE_REGISTER_ALL}
+     *
+     * re-send all the currently registered actions to Neuro
+     * @return if the command was successful
+     */
+    @ApiStatus.Internal
+    public boolean reRegisterActions(){
+        registerLock.readLock().lock();
+        List<Map<String, Object>> actionList = new ArrayList<>();
+        for (Action action : this.registeredActions.values()) {
+            actionList.add(action.asMap());
+        }
+        registerLock.readLock().unlock();
+
+        return websocket.sendCommand("actions/register", Map.of("actions", actionList), true);
+    }
+
     @Override
     public boolean registerActions(List<Action> actions) {
         if (!NeuroSDKState.CONNECTED.equals(this.state)) return false;
@@ -319,6 +341,11 @@ public class NeuroSDK implements NeuroSDKInterface {
     @Override
     public List<Action> getRegisteredActions() {
         return new ArrayList<>(this.registeredActions.values());
+    }
+
+    @Override
+    public boolean isEnable(@NotNull ProposedFeature feature){
+        return this.enabledFeatures.contains(feature);
     }
 
 

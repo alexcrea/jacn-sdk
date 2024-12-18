@@ -1,16 +1,20 @@
 package xyz.alexcrea.jacn.sdk;
 
 import org.java_websocket.handshake.ServerHandshake;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.error.WebsocketException;
 import xyz.alexcrea.jacn.listener.NeuroSDKListener;
+import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
 
 import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -34,6 +38,8 @@ public class NeuroSDKBuilder {
     private List<NeuroSDKListener> listeners;
 
     private List<Action> actionList;
+
+    private EnumSet<ProposedFeature> proposed;
 
     /**
      * Create a new builder for
@@ -76,6 +82,8 @@ public class NeuroSDKBuilder {
 
         this.listeners = new ArrayList<>();
         this.actionList = new ArrayList<>();
+
+        this.proposed = EnumSet.noneOf(ProposedFeature.class);
     }
 
     /**
@@ -332,6 +340,40 @@ public class NeuroSDKBuilder {
     @NotNull
     public NeuroSDKBuilder addListeners(@NotNull NeuroSDKListener... listeners) {
         this.listeners.addAll(List.of(listeners));
+        return this;
+    }
+
+    /**
+     * Get enabled proposed features.
+     * @return set of enabled proposed features
+     */
+    @ApiStatus.Experimental
+    @NotNull
+    public Set<ProposedFeature> getProposed() {
+        return EnumSet.copyOf(proposed);
+    }
+
+    /**
+     * Enabled an array of proposed features
+     * @param proposed the list of proposed feature to enable
+     * @return this
+     */
+    @ApiStatus.Experimental
+    @NotNull
+    public NeuroSDKBuilder addProposed(@NotNull ProposedFeature... proposed) {
+        this.proposed.addAll(List.of(proposed));
+        return this;
+    }
+
+    /**
+     * Disable an array of proposed features
+     * @param proposed the list of proposed feature to disable
+     * @return this
+     */
+    @ApiStatus.Experimental
+    @NotNull
+    public NeuroSDKBuilder removeProposed(@NotNull ProposedFeature... proposed) {
+        List.of(proposed).forEach(this.proposed::remove);
         return this;
     }
 

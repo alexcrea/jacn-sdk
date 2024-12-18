@@ -17,6 +17,7 @@ import xyz.alexcrea.jacn.listener.NeuroSDKListener;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 import xyz.alexcrea.jacn.sdk.NeuroSDKBuilder;
 import xyz.alexcrea.jacn.sdk.NeuroSDKState;
+import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
 
 import java.net.ConnectException;
 import java.net.URI;
@@ -178,35 +179,46 @@ public class NeuroWebsocket extends WebSocketClient {
                 return;
             }
 
-            String command = commandObj.toString();
-            if (!command.contentEquals("action")) {
-                if (command.contentEquals("actions/reregister_all")) {
-                    // We ignore it as Neuro do not have this action currently.
-                    return;
-                }
-
-                sendInvalidFeedbackUnknownID(message, "Invalid command. only accept action command." +
-                        "\nmessage: " + message);
-                return;
-            }
-
-            Object dataObj = map.get("data");
-            if (!(dataObj instanceof Map<?, ?> data)) {
-                sendInvalidFeedbackUnknownID(message, "Could not find command data" +
-                        "\nmessage: " + message);
-                return;
-            }
-
-            ActionRequest request = findRequest(data, message);
-            if (request == null) return;
-
-            executeActionRequest(request);
+            handleCommand(message, commandObj.toString(), map);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
 
             sendInvalidFeedbackUnknownID(message, "Could not parse json. it is malformed: " + e.getMessage() +
                     "\nmessage: " + message);
         }
+    }
+
+    private void handleCommand(@NotNull String message, @NotNull String command, @NotNull HashMap<?, ?> map) {
+        switch (command) {
+            case "action":
+                handleIngoingAction(message, map);
+                break;
+            case "actions/reregister_all":
+                handleReRegister();
+                break;
+            case "shutdown/graceful":
+                //TODO
+                break;
+            case "shutdown/immediate":
+                //TODO
+                break;
+            default:
+                System.err.println("Unknown incoming command: " + command);
+        }
+    }
+
+    private void handleIngoingAction(@NotNull String message, @NotNull HashMap<?, ?> map) {
+        Object dataObj = map.get("data");
+        if (!(dataObj instanceof Map<?, ?> data)) {
+            sendInvalidFeedbackUnknownID(message, "Could not find command data" +
+                    "\nmessage: " + message);
+            return;
+        }
+
+        ActionRequest request = findRequest(data, message);
+        if (request == null) return;
+
+        executeActionRequest(request);
     }
 
     private void sendInvalidFeedbackUnknownID(@NotNull String message, String errorToSend) {
@@ -329,6 +341,19 @@ public class NeuroWebsocket extends WebSocketClient {
         if (result.message() != null) toSend.put("message", result.message());
 
         return sendCommand("action/result", toSend);
+    }
+
+    private void handleReRegister() {
+        if (!parent.isEnable(ProposedFeature.RE_REGISTER_ALL)) {
+            System.err.println("Received re register all command even with re-register feature flag not present.");
+            System.err.println("Are you using randy or similar ? if so that a normal behavior.");
+            System.err.println("else you should probably either update the SDK or enable this ProposedFlag");
+            return;
+        }
+
+        if (!parent.reRegisterActions()) {
+            System.err.println("Could not re register the actions");
+        }
     }
 
     @Override

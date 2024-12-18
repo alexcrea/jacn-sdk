@@ -19,7 +19,9 @@ see [the installation guide](./INSTALL.md)
 - [ ] rethink default sdk event callbacks
 - [X] get address by environment variable if exist
 - [ ] verify action result status and make sure everything is ok in the example and sdk (some parts may be too precautious and neuro may be more safe than expected)
-- [ ] add some proposed feature 
+- [X] add some proposed feature 
+- [ ] use proper logger
+
 ## Need help or suggestion ?
 You can either create an issue/pr/discussion here or join [my discord](https://discord.gg/swBrMf327a)
 

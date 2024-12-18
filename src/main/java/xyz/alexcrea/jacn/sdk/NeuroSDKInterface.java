@@ -3,6 +3,7 @@ package xyz.alexcrea.jacn.sdk;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
+import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
 
 import java.util.List;
 
@@ -265,5 +266,13 @@ public interface NeuroSDKInterface {
      * @return a list of all the registered actions
      */
     List<Action> getRegisteredActions();
+
+    /**
+     * Get if a proposed feature is enabled.
+     * By default, no feature is enabled. see {@link NeuroSDKBuilder#addProposed The Builder} for more information.
+     * @param feature the feature to test if enable
+     * @return if the provided feature is enabled
+     */
+    boolean isEnable(@NotNull ProposedFeature feature);
 
 }

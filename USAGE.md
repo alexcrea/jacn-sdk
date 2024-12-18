@@ -87,6 +87,10 @@ sdk.unregisterActions(list of actions);
 
 Only registered action can be user by Neuro and by force action.
 
+### About Option Map Action
+Option map action allow to select one of the provided option easily.
+For example it is used in the listener example to select a position to play on 
+
 ### About forced Actions
 
 Forced action is a way to force neuro to choose one of the provided actions.
