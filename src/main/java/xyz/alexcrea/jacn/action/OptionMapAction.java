@@ -27,69 +27,31 @@ public class OptionMapAction<T> extends Action {
     private final @NotNull ArrayNode options;
 
     public OptionMapAction(@NotNull String name, @NotNull String description,
-                           @Nullable String schemaTitle, @Nullable String schemaDescription,
                            @Nullable Map<String, T> options,
                            @Nullable Function<@NotNull ActionRequest, ActionResult> onResult) {
         super(name, description, onResult);
         this.valueMap = Objects.requireNonNullElseGet(options, HashMap::new);
 
-        this.rootNode = createObjectListSchema(this.valueMap, schemaTitle, schemaDescription);
+        this.rootNode = createObjectListSchema(this.valueMap);
         this.options = (ArrayNode) this.rootNode.get("properties").get("options").get("enum");
 
         super.setSchema(this.rootNode);
     }
 
     public OptionMapAction(@NotNull String name, @NotNull String description,
-                           @Nullable String schemaTitle, @Nullable String schemaDescription,
                            @Nullable Function<@NotNull ActionRequest, ActionResult> onResult) {
-        this(name, description, schemaTitle, schemaDescription, null,  onResult);
+        this(name, description, null, onResult);
     }
 
-    public OptionMapAction(@NotNull String name, @NotNull String description,
-                           @Nullable String schemaTitle,
-                           @Nullable Function<@NotNull ActionRequest, ActionResult> onResult) {
-        this(name, description, schemaTitle, null,  onResult);
-    }
-
-    public OptionMapAction(@NotNull String name, @NotNull String description,
-                           @Nullable Function<@NotNull ActionRequest, ActionResult> onResult) {
-        this(name, description, null,  onResult);
-    }
-
-
-    public OptionMapAction(@NotNull String name, @NotNull String description,
-                           @Nullable String schemaTitle, @Nullable String schemaDescription,
-                           @Nullable Map<String, T> options) {
-        this(name, description, schemaTitle, schemaDescription, options, null);
-    }
-
-    public OptionMapAction(@NotNull String name, @NotNull String description,
-                           @Nullable String schemaTitle, @Nullable String schemaDescription) {
-        this(name, description, schemaTitle, schemaDescription, null,  null);
-    }
-
-    public OptionMapAction(@NotNull String name, @NotNull String description,
-                           @Nullable String schemaTitle) {
-        this(name, description, schemaTitle, null, null, null);
-    }
 
     public OptionMapAction(@NotNull String name, @NotNull String description) {
-        this(name, description, null, null, null, null);
+        this(name, description, null);
     }
 
     private static <T> @NotNull ObjectNode createObjectListSchema(
-            @NotNull Map<String, T> values,
-            @Nullable String schemaTitle,
-            @Nullable String schemaDescription) {
+            @NotNull Map<String, T> values) {
 
         ObjectNode jsonRoot = mapper.createObjectNode();
-        jsonRoot.put("$schema", "https://json-schema.org/draft/2020-12/schema");
-        if(schemaTitle != null){
-            jsonRoot.put("title", schemaTitle);
-        }
-        if(schemaDescription != null){
-            jsonRoot.put("description", schemaDescription);
-        }
         jsonRoot.put("type", "object");
 
         ObjectNode properties = jsonRoot.putObject("properties");
@@ -113,13 +75,14 @@ public class OptionMapAction<T> extends Action {
      * or to replace a mapping of an already existing option.
      * if it called with a new option Neuro would not get update about this action,
      * this action will to be re-registered (unregister then re-register it)
+     *
      * @param option The key of this option
      * @param value  The mapped value of this option
      * @return if this option was already registered
      */
-    public boolean setOption(@NotNull String option, @NotNull T value){
+    public boolean setOption(@NotNull String option, @NotNull T value) {
         T previous = this.valueMap.put(option, value);
-        if(previous == null){
+        if (previous == null) {
             this.options.add(option);
             super.setSchema(this.rootNode);
             return false;
@@ -132,11 +95,12 @@ public class OptionMapAction<T> extends Action {
      * Remove this option from the options mapping.
      * This method should only be called before the action is registered
      * or it will need to be re-registered to be updated on Neuro side.
+     *
      * @param option the option key to remove
      * @return if the option was present and removed
      */
-    public boolean removeOption(@NotNull String option){
-        if(this.valueMap.remove(option) == null)
+    public boolean removeOption(@NotNull String option) {
+        if (this.valueMap.remove(option) == null)
             return false;
 
         // Get index of the value
@@ -145,7 +109,7 @@ public class OptionMapAction<T> extends Action {
 
         this.options.elements().forEachRemaining(
                 nodeToTest -> {
-                    if(option.contentEquals(nodeToTest.asText())){
+                    if (option.contentEquals(nodeToTest.asText())) {
                         index.set(accumulator.get());
                     }
                     accumulator.getAndIncrement();
@@ -162,8 +126,8 @@ public class OptionMapAction<T> extends Action {
      * This method should only be called before the action is registered,
      * or it will need to be re-registered to be updated on Neuro side.
      */
-    public void clearOptions(){
-        if(!this.options.isEmpty()){
+    public void clearOptions() {
+        if (!this.options.isEmpty()) {
             this.options.removeAll();
             super.setSchema(this.rootNode);
         }
@@ -171,22 +135,24 @@ public class OptionMapAction<T> extends Action {
 
     /**
      * Get the mapping associated with the option name
+     *
      * @param option the option name
      * @return the value associated to it. null if absent
      */
     @Nullable
-    public T get(@NotNull String option){
+    public T get(@NotNull String option) {
         return this.valueMap.get(option);
     }
 
     /**
      * Get the selected value from an action request
+     *
      * @param request the source action request
      * @return the value associated to it. null if absent or could not find the value.
      */
     @Nullable
-    public T get(@NotNull ActionRequest request){
-        if(request.data() != null){
+    public T get(@NotNull ActionRequest request) {
+        if (request.data() != null) {
             return get(request.data().get("options").asText());
         }
         return null;
@@ -194,9 +160,10 @@ public class OptionMapAction<T> extends Action {
 
     /**
      * Get the action count
+     *
      * @return the number of mapped actions
      */
-    public int size(){
+    public int size() {
         return this.valueMap.size();
     }
 
