@@ -74,7 +74,8 @@ public class TicTacToeListener extends AbstractSDKListener {
     @Override
     public @Nullable ActionResult onActionRequest(@NotNull ActionRequest request, @NotNull NeuroSDK sdk) {
         if (!request.from().getName().contentEquals("play")) return null;
-        // We know we created an option action like this when we register a "play" action
+        // We know we created an option action of the generic type TicTacToeLocation this when we registered the "play" action
+        // So it is ok to cast like this.
         OptionMapAction<TicTacToeLocation> action = (OptionMapAction<TicTacToeLocation>) request.from();
 
         // Fetch location from data of request

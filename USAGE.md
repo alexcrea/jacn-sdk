@@ -3,6 +3,7 @@
 - [Common code](#Common)
     - [Create the SDK instance](#Create-the-SDK-instance)
     - [Create and register Actions](#Create-and-register-Actions)
+    - [About Option Map Action](#About-Option-Map-Action)
     - [About Force Actions](#About-forced-Actions)
     - [Sending Context](#Sending-Context)
 - [Using callback](#Common)
@@ -88,8 +89,39 @@ sdk.unregisterActions(list of actions);
 Only registered action can be user by Neuro and by force action.
 
 ### About Option Map Action
+
 Option map action allow to select one of the provided option easily.
-For example it is used in the listener example to select a position to play on 
+You can provide a generic class and get the option result as any object you like.
+
+For example, The following snippet from the Listener example is used to create an option action "play"
+and add every TicTacToeLocation from the list possibleLocations.
+Every of the options need to have distinct name. here the option name is provided by loc.actionName().
+The option name is the way Neuro can distinguish between option of this action. please make it obvious what it is meant
+of doing.
+
+```java
+OptionMapAction<TicTacToeLocation> playAction = new OptionMapAction<>(
+        "play",
+        "Play a position in the tic tac toe grid.");
+for (TicTacToeLocation loc :possibleLocations) {
+    playAction.setOption(loc.actionName(), loc);
+}
+```
+
+You can then get the result with an action request. This snippet is also from the second example.
+
+```java
+
+if(!request.from().getName().contentEquals("play"))return null;
+// We know we created an option action of the generic type TicTacToeLocation this when we registered the "play" action
+// So it is ok to cast like this.
+OptionMapAction<TicTacToeLocation> action = (OptionMapAction<TicTacToeLocation>) request.from();
+
+// Fetch location from data of request
+TicTacToeLocation location = action.get(request);
+```
+
+with "request" being the ActionRequest
 
 ### About forced Actions
 
@@ -143,25 +175,70 @@ You can set websocket events callback via setters on the Neuro SDK builder. name
 These callbacks have default value, mostly logging what happened.
 so don't forget to log things yourself if you set them.
 
-You can also set two callback on a action: \
-one on result (via `Action.setOnResult` or as last constructor parameter), \
-one for after result (via `Action.setAfterResult`), \
+You can also set things on an action: \
+
+- One function "on result" (via `Action.setOnResult` or as last constructor parameter).
+  This function is used when the neuro (or randy) execute this action and the SDK need a ActionResult to respond to her.
+- but also one callback for after result (via `Action.setAfterResult`).
+  It is used to process thing after the result is sent.
 
 > [!NOTE]
-> You should return onResult as fast as possible as Neuro would freeze for the time it execute \
-> afterResult is ok
+> Your onResult functions should return as fast as possible as Neuro would freeze for the time it execute \
+> afterResult callback is not contained by this.
 
-By default, these callbacks are null.
+By default, these two are null.
 
 If onResult return null, The action will be processed by listeners if any.
 If the callback is or return null and every listener returned null, then the action is considered failed.
 
-Please note that if you are using callback and listeners,
-afterResult callback will be called only if the result was provided by onResult callback.
+> [!NOTE]
+> If you are using callback and listeners
+> afterResult callback will be executed only if the result was provided by the onResult function
 
 ## Listeners
 
 [Example of using Listener](./src/main/java/xyz/alexcrea/jacn/example/callback/TicTacToeExample1.java) \
 (currently cleaner than the callback example)
 
-TODO
+You can create an SDK listener by extending your class with AbstractSDKListener.
+You can also directly implement an instance of NeuroSDKListener if you like,
+but the AbstractSDKListener also allow you to access some sdk method directly
+and has less generic methods
+
+You can then add your listener by calling
+
+```java
+YourListenerClass listener = new YourListenerClass();
+sdkBuilder.addListener(listener);
+```
+
+on your sdk builder. with listener being an instance of your listener class.
+
+> [!NOTE]
+> If you like to split your code, unlike callbacks, you can add multiples listeners
+
+On your listener class you can implement multiples methods from AbstractSDKListener.
+Some to handle the SDK state:
+
+- `onConnectSuccess` Called when a connection handshake was successfully done with a websocket.
+- `onConnectFailed` Called when a connection handshake was unsuccessfully done with a websocket.
+- `onConnectError` Called when we could not connect to the websocket.
+- `onClose` Called when the websocket got closed for any reason.
+- `onError` Called when a websocket exception has happened.
+
+And some methods to handle actions
+
+- `onActionRequest` Called when Neuro request an action.
+- `onAfterResult` Called after onActionRequest of this listener returned a non-null result.
+
+> [!NOTE]
+> Your onActionRequest method should return as fast as possible as Neuro would freeze for the time it execute \
+> onAfterResult method is not contained by this.
+>
+> Only one listener or the callback can return a non-null result. 
+> After a non-null result, non-processed listener will not be called.
+> Callback will be called before every listener.
+> Order of calls of listeners is not guaranty.
+
+It is recommended you read javadoc of functions you are implementing.
+

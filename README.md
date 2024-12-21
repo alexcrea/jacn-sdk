@@ -12,7 +12,7 @@ see [the installation guide](./INSTALL.md)
 - [X] Make JSON schema
 - [X] Implement a better way to handle things
 - [X] Create example how to use the better way
-- [ ] docs of how to use the better way
+- [X] docs of how to use the better way
 
 ### And some detail
 - [ ] move example to a module excluded from gradle publish

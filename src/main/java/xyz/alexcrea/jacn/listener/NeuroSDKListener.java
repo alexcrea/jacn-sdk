@@ -76,7 +76,7 @@ public interface NeuroSDKListener {
     ActionResult onActionRequest(@NotNull ActionRequest request, @NotNull NeuroSDK sdk);
 
     /**
-     * Called after {@link #onActionRequest} returned a non-null result.
+     * Called after {@link #onActionRequest} of this listener returned a non-null result.
      * This function is, probably, only called from the websocket thread.
      *
      * @param request the requested action
