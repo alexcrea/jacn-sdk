@@ -184,15 +184,14 @@ You can also set things on an action: \
 
 > [!NOTE]
 > Your onResult functions should return as fast as possible as Neuro would freeze for the time it execute \
-> afterResult callback is not contained by this.
+> afterResult callback is not constrained by this.
 
-By default, these two are null.
+By default, onResult and afterResult are null.
 
 If onResult return null, The action will be processed by listeners if any.
 If the callback is or return null and every listener returned null, then the action is considered failed.
 
 > [!NOTE]
-> If you are using callback and listeners
 > afterResult callback will be executed only if the result was provided by the onResult function
 
 ## Listeners
@@ -214,7 +213,7 @@ sdkBuilder.addListener(listener);
 
 on your sdk builder. with listener being an instance of your listener class.
 
-> [!NOTE]
+> [!TIP]
 > If you like to split your code, unlike callbacks, you can add multiples listeners
 
 On your listener class you can implement multiples methods from AbstractSDKListener.
@@ -224,21 +223,24 @@ Some to handle the SDK state:
 - `onConnectFailed` Called when a connection handshake was unsuccessfully done with a websocket.
 - `onConnectError` Called when we could not connect to the websocket.
 - `onClose` Called when the websocket got closed for any reason.
-- `onError` Called when a websocket exception has happened.
+- `onError` Called when a websocket exception has happened. Will also be called before onConnectError.
 
 And some methods to handle actions
 
 - `onActionRequest` Called when Neuro request an action.
-- `onAfterResult` Called after onActionRequest of this listener returned a non-null result.
+- `onAfterResult` Called only after onActionRequest of this listener returned a non-null result.
 
 > [!NOTE]
 > Your onActionRequest method should return as fast as possible as Neuro would freeze for the time it execute \
 > onAfterResult method is not contained by this.
 >
 > Only one listener or the callback can return a non-null result. 
-> After a non-null result, non-processed listener will not be called.
-> Callback will be called before every listener.
+> After a non-null result, no more listener "onActionRequest" method will not be called.
+> Action's Callback will be called before every listener.
 > Order of calls of listeners is not guaranty.
+
+Default implementation of onActionRequest return null. 
+so onAfterResult will never be called if you do not also implement onActionRequest.
 
 It is recommended you read javadoc of functions you are implementing.
 
