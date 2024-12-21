@@ -10,6 +10,8 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
@@ -31,6 +33,8 @@ import java.util.function.Function;
  */
 @ApiStatus.Internal
 public class NeuroWebsocket extends WebSocketClient {
+
+    private final static Logger logger = LoggerFactory.getLogger(NeuroWebsocket.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -88,13 +92,27 @@ public class NeuroWebsocket extends WebSocketClient {
         }
     }
 
-    private void actionExecuteFailed(@NotNull ActionRequest request, @NotNull String reason) {
-        String report = "Could not execute action request " + request.from().getName() + ": " + reason;
-        System.err.println(report);
+    private void actionExecuteFailed(@NotNull ActionRequest request, @Nullable String reason, @Nullable Exception e) {
+        StringBuilder report = new StringBuilder("Could not execute action request ").append(request.from().getName());
+        if (reason != null) {
+            report.append(": ").append(reason);
+        }
+
+        logger.error(report.toString(), e);
 
         ActionResult failed;
         if (request.from().isReportFailure()) {
-            failed = new ActionResult(request.id(), false, report);
+            if (e != null) {
+                if (reason == null) {
+                    report.append(": ");
+                } else {
+                    report.append("\n ");
+                }
+
+                report.append(e.getMessage());
+            }
+
+            failed = new ActionResult(request.id(), false, report.toString());
         } else {
             failed = new ActionResult(request.id(), true, "");
         }
@@ -114,9 +132,7 @@ public class NeuroWebsocket extends WebSocketClient {
             }
 
         } catch (Exception e) {
-            actionExecuteFailed(request, "Exception thrown while executing the request: " + e.getMessage());
-            e.printStackTrace();
-            return;
+            actionExecuteFailed(request, "Exception thrown while executing the action request on the action's callback", e);
         }
 
         NeuroSDKListener resultingListener = null;
@@ -130,15 +146,13 @@ public class NeuroWebsocket extends WebSocketClient {
                         break;
                     }
                 } catch (Exception e) {
-                    actionExecuteFailed(request, "Exception thrown while executing the request on a listener: " + e.getMessage());
-                    e.printStackTrace();
-                    return;
+                    actionExecuteFailed(request, "Exception thrown while executing the request on a listener", e);
                 }
             }
         }
 
         if (result == null) {
-            actionExecuteFailed(request, "result is returned null");
+            actionExecuteFailed(request, "All of the action request listeners and the action's callback returned null", null);
             return;
         }
 
@@ -157,7 +171,7 @@ public class NeuroWebsocket extends WebSocketClient {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception thrown while executing the after result for an action request from action {}", request.from().getName(), e);
         }
 
     }
@@ -168,23 +182,20 @@ public class NeuroWebsocket extends WebSocketClient {
             HashMap<?, ?> map = objectMapper.readValue(message, HashMap.class);
             if (map == null) {
                 sendInvalidFeedbackUnknownID(message, "Could not parse json: " +
-                        "\nmessage: " + message);
+                        "\nmessage: " + message, null);
                 return;
             }
 
             Object commandObj = map.get("command");
             if (commandObj == null) {
                 sendInvalidFeedbackUnknownID(message, "Could not find command: " +
-                        "\nmessage: " + message);
+                        "\nmessage: " + message, null);
                 return;
             }
 
             handleCommand(message, commandObj.toString(), map);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
-
-            sendInvalidFeedbackUnknownID(message, "Could not parse json. it is malformed: " + e.getMessage() +
-                    "\nmessage: " + message);
+            sendInvalidFeedbackUnknownID(message, "Could not parse json. it is malformed. message: " + message, e);
         }
     }
 
@@ -203,7 +214,7 @@ public class NeuroWebsocket extends WebSocketClient {
                 //TODO
                 break;
             default:
-                System.err.println("Unknown incoming command: " + command);
+                logger.error("Unknown incoming command: {}", command);
         }
     }
 
@@ -211,7 +222,7 @@ public class NeuroWebsocket extends WebSocketClient {
         Object dataObj = map.get("data");
         if (!(dataObj instanceof Map<?, ?> data)) {
             sendInvalidFeedbackUnknownID(message, "Could not find command data" +
-                    "\nmessage: " + message);
+                    "\nmessage: " + message, null);
             return;
         }
 
@@ -221,23 +232,25 @@ public class NeuroWebsocket extends WebSocketClient {
         executeActionRequest(request);
     }
 
-    private void sendInvalidFeedbackUnknownID(@NotNull String message, String errorToSend) {
+    private void sendInvalidFeedbackUnknownID(@NotNull String message, @NotNull String errorToSend, @Nullable Exception e) {
         String id = findID(message);
         if (id == null) {
-            System.err.println(errorToSend);
+            logger.error(errorToSend, e);
             return;
         }
-        sendInvalidFeedbackKnownID(id, errorToSend);
+
+        sendInvalidFeedbackKnownID(id, errorToSend, e);
     }
 
-    private void sendInvalidFeedbackKnownID(@NotNull String id, String errorToSend) {
+    private void sendInvalidFeedbackKnownID(@NotNull String id, @NotNull String errorToSend, @Nullable Exception e) {
         ActionResult failedResult = new ActionResult(id, false, errorToSend);
 
         if (!sendResult(failedResult)) {
-            System.err.println("Could not send result feedback: " +
-                    "\n" + errorToSend);
-            close(CloseFrame.PROTOCOL_ERROR, "Could not send result feedback: " +
-                    "\n" + errorToSend);
+            String reason = "Could not send result feedback: " +
+                    "\n" + errorToSend;
+
+            logger.error(reason, e);
+            close(CloseFrame.PROTOCOL_ERROR, reason);
         }
     }
 
@@ -246,7 +259,7 @@ public class NeuroWebsocket extends WebSocketClient {
         Object idObj = map.get("id");
         if (idObj == null) {
             sendInvalidFeedbackUnknownID(message, "Could not find the id field on the message" +
-                    "\nmessage: " + message);
+                    "\nmessage: " + message, null);
             return null;
         }
         String id = idObj.toString();
@@ -254,7 +267,7 @@ public class NeuroWebsocket extends WebSocketClient {
         Object nameObj = map.get("name");
         if (nameObj == null) {
             sendInvalidFeedbackKnownID(id, "Could not find the action name on the message" +
-                    "\nmessage: " + message);
+                    "\nmessage: " + message, null);
             return null;
         }
         String name = nameObj.toString();
@@ -310,23 +323,20 @@ public class NeuroWebsocket extends WebSocketClient {
         // Try to find the id in a very poor way
         int startIndex = message.indexOf("\"id\":");
         if (startIndex == -1) {
-            System.err.println("Did not find id field" +
-                    "\nmessage: " + message);
+            logger.error("Did not find id field. message: {}", message);
             close(CloseFrame.PROTOCOL_ERROR, "Did not find id field");
             return null;
         }
         startIndex = message.indexOf("\"", startIndex + 5) + 1;
         if (startIndex == 0) {
-            System.err.println("Did not find start of id field" +
-                    "\nmessage: " + message);
+            logger.error("Did not find start of id field. message: {}", message);
             close(CloseFrame.PROTOCOL_ERROR, "Did not find start of id field");
             return null;
         }
 
         int badEndIndex = message.indexOf("\"", startIndex);
         if (badEndIndex == -1) {
-            System.err.println("Did not find end of id field" +
-                    "\nmessage: " + message);
+            logger.error("Did not find end of id field. message: {}", message);
             close(CloseFrame.PROTOCOL_ERROR, "Did not find end of id field");
             return null;
         }
@@ -345,14 +355,15 @@ public class NeuroWebsocket extends WebSocketClient {
 
     private void handleReRegister() {
         if (!parent.isEnable(ProposedFeature.RE_REGISTER_ALL)) {
-            System.err.println("Received re register all command even with re-register feature flag not present.");
-            System.err.println("Are you using randy or similar ? if so that a normal behavior.");
-            System.err.println("else you should probably either update the SDK or enable this ProposedFlag");
+            logger.error("""
+                    Received re register all command even with re-register feature flag not present.
+                    Are you using randy or similar ? if so that a normal behavior.
+                    else you should probably either update the SDK or enable this ProposedFlag""");
             return;
         }
 
         if (!parent.reRegisterActions()) {
-            System.err.println("Could not re register the actions");
+            logger.error("Could not re register the actions");
         }
     }
 

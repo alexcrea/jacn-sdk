@@ -1,7 +1,8 @@
 package xyz.alexcrea.jacn.example.listener;
 
 import org.jetbrains.annotations.NotNull;
-import xyz.alexcrea.jacn.action.Action;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.action.OptionMapAction;
 import xyz.alexcrea.jacn.example.game.TicTacToeCaseState;
 import xyz.alexcrea.jacn.example.game.TicTacToeGame;
@@ -19,6 +20,8 @@ import java.util.Scanner;
  * For the listener part. see {@link xyz.alexcrea.jacn.example.listener.TicTacToeListener}
  */
 public class TicTacToeExample2 {
+
+    private final static Logger logger = LoggerFactory.getLogger(TicTacToeExample2.class);
 
     public static void main(String[] args) throws InterruptedException {
         // Instantiate game objects
@@ -140,7 +143,7 @@ public class TicTacToeExample2 {
                                           @NotNull NeuroSDK sdk) throws InterruptedException {
         // Check Neuro's turn obviously
         if (game.getTurn() != TicTacToeCaseState.PLAYER2) {
-            System.err.println("It is not Neuro's turn.");
+            logger.info("It is not Neuro's turn. but she tried to play");
             return false;
         }
 
@@ -154,11 +157,11 @@ public class TicTacToeExample2 {
 
         // Register and force play action
         if (!sdk.registerActions(playAction)) {
-            System.err.println("Could not register play action");
+            logger.error("Could not register play action");
             return false;
         }
         if (!sdk.forceActions(game.gameState(), "It is your turn. please play on a empty tic-tac-toe case.", playAction)) {
-            System.err.println("Could not send send force play action");
+            logger.error("Could not send send force play action");
             return false;
         }
 

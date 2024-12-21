@@ -6,6 +6,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.NeuroWebsocket;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
@@ -20,6 +22,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 @SuppressWarnings({"unused"})
 public class NeuroSDK implements NeuroSDKInterface {
+
+    private final static Logger logger = LoggerFactory.getLogger(NeuroSDK.class);
 
     private final @NotNull String gameName;
 
@@ -79,9 +83,7 @@ public class NeuroSDK implements NeuroSDKInterface {
             return;
         }
         if (!startup()) {
-            System.err.println("Could not startup the websocket");
-
-            websocket.close(CloseFrame.PROTOCOL_ERROR, "Could not startup the websocket");
+            websocket.close(CloseFrame.PROTOCOL_ERROR, "Could not send startup command to the websocket");
         }
     }
 
@@ -164,7 +166,7 @@ public class NeuroSDK implements NeuroSDKInterface {
         this.registeredActions.clear();
 
         if (!websocket.sendCommand("startup", null, true)) {
-            System.err.println("Could not send startup command");
+            logger.error("Could not send startup command to the websocket");
             this.state = NeuroSDKState.ERROR;
 
             registerLock.writeLock().unlock();
@@ -173,7 +175,7 @@ public class NeuroSDK implements NeuroSDKInterface {
 
         // register the startup actions
         if (!internalRegisterActions(actionsToRegisterOnConnect)) {
-            System.err.println("Could not register startup actions");
+            logger.error("Could not register startup actions");
             this.state = NeuroSDKState.ERROR;
 
             registerLock.writeLock().unlock();
@@ -203,7 +205,7 @@ public class NeuroSDK implements NeuroSDKInterface {
         List<Map<String, Object>> actionList = new ArrayList<>();
         for (Action action : actions) {
             if (!internalRegisterAction(action)) {
-                System.err.println("Could not register action " + action.getName());
+                logger.error("Could not register action {}", action.getName());
             }
             actionList.add(action.asMap());
         }
@@ -215,12 +217,13 @@ public class NeuroSDK implements NeuroSDKInterface {
     /**
      * DO NOT USE THIS METHOD INTERNAL ONLY.
      * INTENDED USE IS FOR {@link ProposedFeature#RE_REGISTER_ALL}
-     *
+     * <p>
      * re-send all the currently registered actions to Neuro
+     *
      * @return if the command was successful
      */
     @ApiStatus.Internal
-    public boolean reRegisterActions(){
+    public boolean reRegisterActions() {
         registerLock.readLock().lock();
         List<Map<String, Object>> actionList = new ArrayList<>();
         for (Action action : this.registeredActions.values()) {
@@ -251,7 +254,7 @@ public class NeuroSDK implements NeuroSDKInterface {
         List<String> actionNames = new ArrayList<>();
         for (Action action : actions) {
             if (!internalUnregisterAction(action)) {
-                System.err.println("Could not unregister action " + action.getName());
+                logger.error("Could not unregister action {}", action.getName());
             }
 
             actionNames.add(action.getName());
@@ -344,7 +347,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    public boolean isEnable(@NotNull ProposedFeature feature){
+    public boolean isEnable(@NotNull ProposedFeature feature) {
         return this.enabledFeatures.contains(feature);
     }
 

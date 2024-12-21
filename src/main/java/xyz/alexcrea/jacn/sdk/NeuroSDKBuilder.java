@@ -5,8 +5,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.action.Action;
-import xyz.alexcrea.jacn.error.WebsocketException;
 import xyz.alexcrea.jacn.listener.NeuroSDKListener;
 import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
 
@@ -22,6 +23,8 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings({"unused"})
 public class NeuroSDKBuilder {
+
+    private final static Logger logger = LoggerFactory.getLogger(NeuroSDKBuilder.class);
 
     private static final String DEFAULT_ADDRESS = "localhost";
     private static final short DEFAULT_PORT = 8000;
@@ -39,14 +42,14 @@ public class NeuroSDKBuilder {
 
     private List<Action> actionList;
 
-    private EnumSet<ProposedFeature> proposed;
+    private final EnumSet<ProposedFeature> proposed;
 
     /**
      * Create a new builder for
      * <p>
      * Default builder has localhost as address and 8000 as port.
      * But will use environment variable if exist and no address is provided.
-     * It also log error to system err on connect and print stacktrace on error.
+     * It also logs error to SLF4J logger on error level.
      * No default action is prepared to be registered by default
      *
      * @param gameName The game name.
@@ -62,22 +65,22 @@ public class NeuroSDKBuilder {
             if (status == 101) return;
 
             if (status < 200 || status >= 300) {
-                System.err.println("Got error while connecting to the websocket: " +
-                        "(" + handshake.getHttpStatus() + ") " + handshake.getHttpStatusMessage() +
-                        "\nIs Neuro or randy open ?");
+                logger.error("Got error while connecting to the websocket: ({}) {}\nIs Neuro or randy open ?",
+                        handshake.getHttpStatus(),
+                        handshake.getHttpStatusMessage());
             }
         };
-        this.onClose = string -> {
-            System.out.println("Closed: " + string);
+        this.onClose = reason -> {
+            logger.info("NeuroSDK Closed: {}", reason);
         };
         this.onError = error -> {
             if (error instanceof ConnectException) {
-                System.err.println("Error connecting to the websocket");
-                System.err.println("Is Neuro or Randy open ?");
+                logger.error("Error connecting to the websocket\n" +
+                        "Is Neuro or Randy open ?");
                 return;
             }
 
-            new WebsocketException("Got error while running the websocket: ", error).printStackTrace();
+            logger.error("Got error while running the websocket: ", error);
         };
 
         this.listeners = new ArrayList<>();
@@ -345,6 +348,7 @@ public class NeuroSDKBuilder {
 
     /**
      * Get enabled proposed features.
+     *
      * @return set of enabled proposed features
      */
     @ApiStatus.Experimental
@@ -355,6 +359,7 @@ public class NeuroSDKBuilder {
 
     /**
      * Enabled an array of proposed features
+     *
      * @param proposed the list of proposed feature to enable
      * @return this
      */
@@ -367,6 +372,7 @@ public class NeuroSDKBuilder {
 
     /**
      * Disable an array of proposed features
+     *
      * @param proposed the list of proposed feature to disable
      * @return this
      */

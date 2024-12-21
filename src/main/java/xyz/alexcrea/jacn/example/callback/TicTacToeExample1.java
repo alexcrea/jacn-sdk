@@ -2,6 +2,8 @@ package xyz.alexcrea.jacn.example.callback;
 
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
@@ -22,6 +24,8 @@ import java.util.Scanner;
  * This example is currently dirty and should get a rewrite. it is recommended to see {@link xyz.alexcrea.jacn.example.listener.TicTacToeExample2} instead.
  */
 public class TicTacToeExample1 {
+
+    private final static Logger logger = LoggerFactory.getLogger(TicTacToeExample1.class);
 
     public static void main(String[] args) {
         TicTacToeExample1 game = new TicTacToeExample1();
@@ -50,8 +54,7 @@ public class TicTacToeExample1 {
             wait(10000);
         }
         if (sdk.getState() != NeuroSDKState.CONNECTED) {
-            System.err.println("Websocket took to much time to connect or an error occurred while connecting to it. " +
-                    ("(Current state: " + sdk.getState() + ")"));
+            logger.info("Websocket took to much time to connect or an error occurred while connecting to it. (Current state: {})", sdk.getState());
             return;
         }
 
@@ -114,13 +117,11 @@ public class TicTacToeExample1 {
         // Check status first
         int status = handshake.getHttpStatus();
         if ((status < 200 || status >= 300) && (status != 101)) {
-            System.err.println("Got error while connecting to the websocket: " +
-                    "(" + handshake.getHttpStatus() + ") " + handshake.getHttpStatusMessage() +
-                    "\nIs Neuro or randy open ?");
+            logger.error("Got error while connecting to the websocket: ({}) {}\nIs Neuro or randy open ?", handshake.getHttpStatus(), handshake.getHttpStatusMessage());
             return;
         }
 
-        System.out.println("Connected");
+        logger.info("Connected");
         synchronized (this) {
             notify();
         }

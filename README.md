@@ -20,7 +20,7 @@ see [the installation guide](./INSTALL.md)
 - [X] get address by environment variable if exist
 - [ ] verify action result status and make sure everything is ok in the example and sdk (some parts may be too precautious and neuro may be more safe than expected)
 - [X] add some proposed feature 
-- [ ] use proper logger
+- [X] use proper logger
 
 ## Need help or suggestion ?
 You can either create an issue/pr/discussion here or join [my discord](https://discord.gg/swBrMf327a)
