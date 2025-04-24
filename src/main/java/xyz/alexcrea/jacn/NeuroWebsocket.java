@@ -315,7 +315,7 @@ public class NeuroWebsocket extends WebSocketClient {
             dataNode = null;
         }
 
-        return new ActionRequest(action, name, dataNode);
+        return new ActionRequest(action, id, dataNode);
     }
 
     @Nullable

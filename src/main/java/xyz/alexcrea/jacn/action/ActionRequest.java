@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represent an action request from Neuro
+ * Represent an action requested from Neuro
  *
  * @param from the requested action
  * @param id   the action request id.
