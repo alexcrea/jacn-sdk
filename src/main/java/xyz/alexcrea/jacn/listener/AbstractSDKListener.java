@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.sdk.ForceActionPriority;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 import xyz.alexcrea.jacn.sdk.NeuroSDKInterface;
 import xyz.alexcrea.jacn.sdk.NeuroSDKState;
@@ -196,6 +197,24 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     public final boolean unregisterActions(@NotNull Action... actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.unregisterActions(actions);
+    }
+
+    @Override
+    public boolean forceActions(@NotNull String query, @NotNull List<Action> actions, ForceActionPriority priority) {
+        if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(query, actions, priority);
+    }
+
+    @Override
+    public boolean forceActions(@Nullable String state, @NotNull String query, @NotNull List<Action> actions, ForceActionPriority priority) {
+        if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(state, query, actions, priority);
+    }
+
+    @Override
+    public boolean forceActions(@Nullable String state, @NotNull String query, boolean ephemeral, @NotNull List<Action> actions, ForceActionPriority priority) {
+        if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.forceActions(state, query, ephemeral, actions, priority);
     }
 
     @Override

@@ -126,6 +126,50 @@ public interface NeuroSDKInterface {
      *                  will be remembered by Neuro after this action.
      *                  If true, Neuro will only remember it for the duration of the action.
      * @param actions   list of possible action to force. one of them should get forced.
+     * @param priority  The priority of forced action
+     * @return if the command was successful
+     */
+    boolean forceActions(
+            @Nullable String state,
+            @NotNull String query,
+            boolean ephemeral,
+            @NotNull List<Action> actions,
+            ForceActionPriority priority);
+
+    /**
+     * This force Neuro to execute one of the following actions as soon as possible.
+     * Note that this may take a bit if she is already talking.
+     *
+     * @param state     An arbitrary string that describe the current state of the game.
+     *                  This can be plaintext, JSON, Markdown, or any other format.
+     *                  This information will be directly received by Neuro.
+     * @param query     A plaintext message that tells Neuro what she is currently supposed to be doing
+     *                  (e.g "It is now your turn, Please perform an action.
+     *                  If you want to use any items, you should use them before picking up the shotgun.")
+     * @param actions   list of possible action to force. one of them should get forced.
+     * @param priority  The priority of this forced action
+     * @return if the command was successful
+     */
+    boolean forceActions(
+            @Nullable String state,
+            @NotNull String query,
+            @NotNull List<Action> actions,
+            ForceActionPriority priority);
+
+    /**
+     * This force Neuro to execute one of the following actions as soon as possible.
+     * Note that this may take a bit if she is already talking.
+     *
+     * @param state     An arbitrary string that describe the current state of the game.
+     *                  This can be plaintext, JSON, Markdown, or any other format.
+     *                  This information will be directly received by Neuro.
+     * @param query     A plaintext message that tells Neuro what she is currently supposed to be doing
+     *                  (e.g "It is now your turn, Please perform an action.
+     *                  If you want to use any items, you should use them before picking up the shotgun.")
+     * @param ephemeral if false, the context provided in {@code state} and {@code query} parameters
+     *                  will be remembered by Neuro after this action.
+     *                  If true, Neuro will only remember it for the duration of the action.
+     * @param actions   list of possible action to force. one of them should get forced.
      * @return if the command was successful
      */
     boolean forceActions(
@@ -133,6 +177,22 @@ public interface NeuroSDKInterface {
             @NotNull String query,
             boolean ephemeral,
             @NotNull List<Action> actions);
+
+    /**
+     * This force Neuro to execute one of the following actions as soon as possible.
+     * Note that this may take a bit if she is already talking.
+     *
+     * @param query     A plaintext message that tells Neuro what she is currently supposed to be doing
+     *                  (e.g "It is now your turn, Please perform an action.
+     *                  If you want to use any items, you should use them before picking up the shotgun.")
+     * @param actions   list of possible action to force. one of them should get forced.
+     * @param priority  The priority of this forced action
+     * @return if the command was successful
+     */
+    boolean forceActions(
+            @NotNull String query,
+            @NotNull List<Action> actions,
+            ForceActionPriority priority);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.

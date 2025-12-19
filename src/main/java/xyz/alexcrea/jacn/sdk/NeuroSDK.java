@@ -274,16 +274,44 @@ public class NeuroSDK implements NeuroSDKInterface {
             @Nullable String state,
             @NotNull String query,
             boolean ephemeral,
-            @NotNull List<Action> action) {
-        List<String> actionNames = new ArrayList<>(registeredActions.keySet());
+            @NotNull List<Action> actions,
+            ForceActionPriority priority) {
+        List<String> actionNames = actions.stream().map(Action::getName).toList();
 
         HashMap<String, Object> toSend = new HashMap<>();
         if (state != null) toSend.put("state", state);
         toSend.put("query", query);
         toSend.put("ephemeral_context", ephemeral);
         toSend.put("action_names", actionNames);
+        toSend.put("priority", priority.getValue());
 
         return websocket.sendCommand("actions/force", toSend);
+    }
+
+    @Override
+    public boolean forceActions(
+            @Nullable String state,
+            @NotNull String query,
+            @NotNull List<Action> actions,
+            ForceActionPriority priority) {
+        return forceActions(state, query, false, actions, priority);
+    }
+
+    @Override
+    public boolean forceActions(
+            @Nullable String state,
+            @NotNull String query,
+            boolean ephemeral,
+            @NotNull List<Action> actions) {
+        return forceActions(state, query, ephemeral, actions, ForceActionPriority.DEFAULT);
+    }
+
+    @Override
+    public boolean forceActions(
+            @NotNull String query,
+            @NotNull List<Action> actions,
+            ForceActionPriority priority) {
+        return forceActions(null, query, actions, priority);
     }
 
     @Override

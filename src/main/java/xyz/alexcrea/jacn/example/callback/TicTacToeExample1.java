@@ -11,6 +11,7 @@ import xyz.alexcrea.jacn.example.game.TicTacToeCaseState;
 import xyz.alexcrea.jacn.example.game.TicTacToeGame;
 import xyz.alexcrea.jacn.example.game.TicTacToeLocation;
 import xyz.alexcrea.jacn.example.game.TicTacToeUtil;
+import xyz.alexcrea.jacn.sdk.ForceActionPriority;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 import xyz.alexcrea.jacn.sdk.NeuroSDKBuilder;
 import xyz.alexcrea.jacn.sdk.NeuroSDKState;
@@ -154,11 +155,13 @@ public class TicTacToeExample1 {
     private boolean neuroPlay(@NotNull TicTacToeCaseState state) throws InterruptedException {
         // we own the game object so neuro can't play currently
         synchronized (game) {
-            // We force actions all the possible actions
+            // We force action all the possible actions to make her select one of them
             sdk.forceActions(game.gameState(), "It is now your turn. " +
                             "You are currently player as the " + state.getPlayerRepresentation() + ". " +
                             "Please play on one of the empty Tic tac Toe case.",
-                    sdk.getRegisteredActions());
+                    sdk.getRegisteredActions(),
+                    ForceActionPriority.MEDIUM // make neuro's speak shorter for a quicker respond
+                    );
 
             // We wait for neuro to play
             game.wait();
