@@ -7,7 +7,7 @@ plugins {
     // Maven publish
     `maven-publish`
     signing
-    id("cn.lalaki.central").version("1.2.5")
+    id("cn.lalaki.central").version("2.0.2")
 }
 
 group = "xyz.alexcrea.jacn"
