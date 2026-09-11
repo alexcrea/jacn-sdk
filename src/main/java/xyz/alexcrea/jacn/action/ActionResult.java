@@ -30,6 +30,7 @@ public record ActionResult(
      * @param success whether the action was successful.
      *                If this is false and this action if part of an action force,
      *                the whole actions force will be immediately retried by Neuro.
+     *                It is retried a limited amount of time for forced action. therefore safe to set it to false
      * @param message a plaintext message that describe what happened when the action was executed.
      *                if not successful, this can either be empty,
      *                or provide a small context to Neuro regarding the action she just took

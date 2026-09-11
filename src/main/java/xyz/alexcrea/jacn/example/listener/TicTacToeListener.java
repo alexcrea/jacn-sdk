@@ -86,16 +86,14 @@ public class TicTacToeListener extends AbstractSDKListener {
         }
 
         if (game.getTurn() != TicTacToeCaseState.PLAYER2) {
-            // We do not want Neuro to retry to action so we send a success even if it failed
-            return new ActionResult(request, true, null);
+            return new ActionResult(request, false, "It is not your turn");
         }
 
         // acquire game lock to ensure the main game loop is waiting
         synchronized (game) {
             // check again now that we own the game lock
             if (game.getTurn() != TicTacToeCaseState.PLAYER2) {
-                // We do not want Neuro to retry to action so we send a success even if it failed
-                return new ActionResult(request, true, null);
+                return new ActionResult(request, false, "It is not your turn");
             }
 
             // Check location is available
@@ -105,6 +103,7 @@ public class TicTacToeListener extends AbstractSDKListener {
                 // YOU SHOULD NOT SEND A FORCE ACTION WHILE ANOTHER FORCE ACTION IS BEING EXECUTED
                 // HERE IT IS SENT TO FIX RANDY NOT RETRYING FORCE ACTION
                 // THIS SHOULD BE DELETED AS FAST AS IT IS FIXED
+                //TODO check if it is fixed
                 sdk.forceActions("ONLY FOR RANDY.", request.from());
 
                 return new ActionResult(request, false, "This case (row: " + (location.row() + 1) + ", column: " + (location.column() + 1) + ") " +
@@ -112,9 +111,9 @@ public class TicTacToeListener extends AbstractSDKListener {
             }
 
             // Finally, we play
-            if (!TicTacToeUtil.tryPlay(game, sdk, location, TicTacToeCaseState.PLAYER2)) {
-                // We do not want Neuro to retry to action so we send a success even if it failed
-                return new ActionResult(request, true, null);
+            var error = TicTacToeUtil.tryPlay(game, sdk, location, TicTacToeCaseState.PLAYER2);
+            if (error.isPresent()) {
+                return new ActionResult(request, false, error.get());
             }
 
             // We unregister the action

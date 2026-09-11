@@ -274,11 +274,8 @@ public class NeuroWebsocket extends WebSocketClient {
         // Try to find the action related to the message
         Action action = parent.getAction(name);
         if (action == null) {
-            // This is kind of complicated:
-            // We know we can't find the action (it is not registered on our side.)
-            // But we can't report as failure as the Neuro side may retry if the action was force
-            // So we report a success with no message just in case to avoid an infinite loop
-            sendResult(new ActionResult(id, true, ""));
+            // Neuro will may retry the action, but if forced only a limited amount of time so we are ok
+            sendResult(new ActionResult(id, false, ""));
             return null;
         }
 

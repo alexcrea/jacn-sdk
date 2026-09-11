@@ -106,20 +106,20 @@ public class TicTacToeExample1 {
             return new ActionResult(request, false, "Location is already used by a player.");
         }
 
-        if (TicTacToeUtil.tryPlay(game, getSdk(), loc, TicTacToeCaseState.PLAYER2)) {
-            // end turn
-            synchronized (game) {
-                game.notify();
-            }
-
-            // And say neuro she could play
-            return new ActionResult(request, true, "You just played on " +
-                    "row " + (loc.row() + 1) + " and column " + (loc.column() + 1));
-        } else {
+        var error = TicTacToeUtil.tryPlay(game, getSdk(), loc, TicTacToeCaseState.PLAYER2);
+        if(error.isPresent()){
             // And neuro could not play
             return new ActionResult(request, false, "It is not your turn");
         }
 
+        // end turn
+        synchronized (game) {
+            game.notify();
+        }
+
+        // Finally respond neuro she was able to play
+        return new ActionResult(request, true, "You just played on " +
+                "row " + (loc.row() + 1) + " and column " + (loc.column() + 1));
     }
 
     public void onConnect(ServerHandshake handshake) {

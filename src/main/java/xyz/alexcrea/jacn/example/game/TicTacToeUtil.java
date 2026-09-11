@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
@@ -71,8 +72,9 @@ public class TicTacToeUtil {
                 continue;
             }
 
-            if (!tryPlay(game, sdk, loc, state)) {
-                System.out.println("It is not your turn ? somehow ?");
+            var error = tryPlay(game, sdk, loc, state);
+            if (error.isPresent()) {
+                System.out.println(error.get());
                 return false;
             }
             sdk.sendContext("Player " + TicTacToeCaseState.PLAYER1.getPlayerRepresentation() + " just played " +
@@ -101,13 +103,13 @@ public class TicTacToeUtil {
      * @param sdk   the neuro sdk
      * @param loc   the location to play
      * @param state the state owned by the player.
-     * @return true if could play. false otherwise.
+     * @return an optional containing the error message, empty if no error happened
      */
-    public static boolean tryPlay(TicTacToeGame game, NeuroSDK sdk,
-                                  TicTacToeLocation loc, TicTacToeCaseState state) {
+    public static Optional<String> tryPlay(TicTacToeGame game, NeuroSDK sdk,
+                                           TicTacToeLocation loc, TicTacToeCaseState state) {
         // Check player's turn
         if (game.getTurn() != state) {
-            return false;
+            return Optional.of("It is not your turn");
         }
 
         // Try to play
@@ -118,7 +120,7 @@ public class TicTacToeUtil {
                 sdk.unregisterActions(action);
             }
 
-            return true;
+            return Optional.empty();
         }
 
         // Remove the action related to this location
@@ -127,7 +129,7 @@ public class TicTacToeUtil {
 
         // Set to the other player turn
         game.switchTurn();
-        return true;
+        return Optional.empty();
     }
 
 }
