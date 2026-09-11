@@ -1,7 +1,7 @@
 package xyz.alexcrea.jacn.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -13,9 +13,10 @@ import org.jetbrains.annotations.Nullable;
  * @param data A JSON that valid
  *             null if the action provided no schema.
  */
+@NotNullByDefault
 public record ActionRequest(
-        @NotNull Action from,
-        @NotNull String id,
+        Action from,
+        String id,
         @Nullable JsonNode data
 ) {
 }

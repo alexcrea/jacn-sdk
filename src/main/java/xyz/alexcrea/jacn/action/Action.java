@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,13 +18,14 @@ import java.util.function.Function;
  * Represent any action to send to neuro
  */
 @SuppressWarnings({"unused"})
+@NotNullByDefault
 public class Action {
 
-    private final @NotNull String name;
-    private final @NotNull String description;
+    private final String name;
+    private final String description;
 
-    private @Nullable Function<@NotNull ActionRequest, @Nullable ActionResult> onResult;
-    private @Nullable BiConsumer<@NotNull ActionRequest, @NotNull ActionResult> afterResult;
+    private @Nullable Function<ActionRequest, @Nullable ActionResult> onResult;
+    private @Nullable BiConsumer<ActionRequest, @Nullable ActionResult> afterResult;
 
     private boolean reportFailure;
 
@@ -57,10 +56,10 @@ public class Action {
      *                    Behavior may change in the future to make it more safe (exception may not be reported as failure for example).
      *                    If you think of a better/safer system please propose it.
      */
-    public Action(@NotNull String name,
-                  @NotNull String description,
+    public Action(String name,
+                  String description,
                   @Nullable JsonSchema schema,
-                  @Nullable Function<@Nullable ActionRequest, ActionResult> onResult) {
+                  @Nullable Function<ActionRequest, @Nullable ActionResult> onResult) {
         this.name = name.toLowerCase();
         this.description = description;
         this.schema = schema;
@@ -95,9 +94,9 @@ public class Action {
      *                    Behavior may change in the future to make it more safe (exception may not be reported as failure for example).
      *                    If you think of a better/safer system please propose it.
      */
-    public Action(@NotNull String name,
-                  @NotNull String description,
-                  @Nullable Function<@NotNull ActionRequest, ActionResult> onResult) {
+    public Action(String name,
+                  String description,
+                  @Nullable Function<ActionRequest, @Nullable ActionResult> onResult) {
         this(name, description, null, onResult);
     }
 
@@ -111,8 +110,8 @@ public class Action {
      *                    This information is directly received by Neuro.
      * @param schema      a simple JSON schema to parse to receive response from neuro
      */
-    public Action(@NotNull String name,
-                  @NotNull String description,
+    public Action(String name,
+                  String description,
                   @Nullable JsonSchema schema) {
         this(name, description, schema, null);
     }
@@ -126,8 +125,8 @@ public class Action {
      * @param description A plaintext description of what this action does.
      *                    This information is directly received by Neuro.
      */
-    public Action(@NotNull String name,
-                  @NotNull String description) {
+    public Action(String name,
+                  String description) {
         this(name, description, null, null);
     }
 
@@ -136,7 +135,7 @@ public class Action {
      *
      * @return the action name
      */
-    public @NotNull String getName() {
+    public String getName() {
         return name;
     }
 
@@ -145,7 +144,7 @@ public class Action {
      *
      * @return the action description
      */
-    public @NotNull String getDescription() {
+    public String getDescription() {
         return description;
     }
 
@@ -155,7 +154,7 @@ public class Action {
      *
      * @return the action executed on result
      */
-    public @Nullable Function<@NotNull ActionRequest, @Nullable ActionResult> getOnResult() {
+    public @Nullable Function<ActionRequest, @Nullable ActionResult> getOnResult() {
         return onResult;
     }
 
@@ -179,8 +178,8 @@ public class Action {
      *                 If you think of a better/safer system please propose it.
      * @return this
      */
-    @NotNull
-    public Action setOnResult(@Nullable Function<@NotNull ActionRequest, @Nullable ActionResult> onResult) {
+    @Contract("_ -> this")
+    public Action setOnResult(@Nullable Function<ActionRequest, @Nullable ActionResult> onResult) {
         this.onResult = onResult;
         return this;
     }
@@ -192,7 +191,7 @@ public class Action {
      *
      * @return the action that will be executed after result send to Neuro
      */
-    public @Nullable BiConsumer<@NotNull ActionRequest, @Nullable ActionResult> getAfterResult() {
+    public @Nullable BiConsumer<ActionRequest, @Nullable ActionResult> getAfterResult() {
         return afterResult;
     }
 
@@ -204,8 +203,8 @@ public class Action {
      * @param afterResult the action that will be executed after result send to Neuro
      * @return this
      */
-    @NotNull
-    public Action setAfterResult(@Nullable BiConsumer<@NotNull ActionRequest, @NotNull ActionResult> afterResult) {
+    @Contract("_ -> this")
+    public Action setAfterResult(@Nullable BiConsumer<ActionRequest, @Nullable ActionResult> afterResult) {
         this.afterResult = afterResult;
         return this;
     }
@@ -235,7 +234,7 @@ public class Action {
      * @param reportFailure if we should report failure to the Neuro API
      * @return this
      */
-    @NotNull
+    @Contract("_ -> this")
     public Action setReportFailure(boolean reportFailure) {
         this.reportFailure = reportFailure;
         return this;
@@ -260,7 +259,7 @@ public class Action {
      * @param uri the simple JSON schema location
      * @return this
      */
-    @NotNull
+    @Contract("_ -> this")
     public Action setSchemaFromURI(@Nullable URI uri) {
         if (uri == null) {
             this.schema = null;
@@ -277,7 +276,7 @@ public class Action {
      * @param uri the simple JSON schema location
      * @return this
      */
-    @NotNull
+    @Contract("_ -> this")
     public Action setSchemaFromURI(@Nullable String uri) {
         if (uri == null) {
             this.schema = null;
@@ -293,7 +292,8 @@ public class Action {
      * @param resourcePath the path to the resource file
      * @return this
      */
-    public @NotNull Action setSchemaFromResource(@Nullable String resourcePath) {
+    @Contract("_ -> this")
+    public Action setSchemaFromResource(@Nullable String resourcePath) {
         if (resourcePath == null) {
             this.schema = null;
             return this;
@@ -316,7 +316,7 @@ public class Action {
      * @param schema the simple JSON schema to validate
      * @return this
      */
-    @NotNull
+    @Contract("_ -> this")
     public Action setSchema(@Nullable JsonSchema schema) {
         this.schema = schema;
         return this;
@@ -329,7 +329,7 @@ public class Action {
      * @param schema the simple JSON schema to validate
      * @return this
      */
-    @NotNull
+    @Contract("_ -> this")
     public Action setSchema(@Nullable JsonNode schema) {
         if (schema == null) {
             this.schema = null;
@@ -346,7 +346,7 @@ public class Action {
      * @param rawSchema the simple JSON schema to validate as a plain string
      * @return this
      */
-    @NotNull
+    @Contract("_ -> this")
     public Action setSchemaRaw(@Nullable String rawSchema) {
         if (rawSchema == null) {
             this.schema = null;

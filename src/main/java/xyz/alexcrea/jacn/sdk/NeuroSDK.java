@@ -2,10 +2,7 @@ package xyz.alexcrea.jacn.sdk;
 
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NonBlocking;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.NeuroWebsocket;
@@ -21,14 +18,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * The instance used to communicate with the Neuro SDK API
  */
 @SuppressWarnings({"unused"})
+@NotNullByDefault
 public class NeuroSDK implements NeuroSDKInterface {
 
     private final static Logger logger = LoggerFactory.getLogger(NeuroSDK.class);
 
-    private final @NotNull String gameName;
+    private final String gameName;
 
-    private volatile @NotNull NeuroSDKState state;
-    private final @NotNull NeuroWebsocket websocket;
+    private volatile NeuroSDKState state;
+    private final NeuroWebsocket websocket;
 
     private final List<Action> actionsToRegisterOnConnect;
 
@@ -44,7 +42,7 @@ public class NeuroSDK implements NeuroSDKInterface {
      * @param builder the builder to base the websocket from
      */
     @NonBlocking
-    public NeuroSDK(@NotNull NeuroSDKBuilder builder) {
+    public NeuroSDK(NeuroSDKBuilder builder) {
         this.gameName = builder.getGameName();
 
         this.state = NeuroSDKState.CONNECTING;
@@ -73,11 +71,11 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    public @NotNull String getGameName() {
+    public String getGameName() {
         return gameName;
     }
 
-    private void onConnect(@NotNull ServerHandshake handshake) {
+    private void onConnect(ServerHandshake handshake) {
         if ((handshake.getHttpStatus() < 200 || handshake.getHttpStatus() >= 300) && (handshake.getHttpStatus() != 101)) {
             this.state = NeuroSDKState.ERROR;
             return;
@@ -97,7 +95,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    public @NotNull NeuroSDKState getState() {
+    public NeuroSDKState getState() {
         return state;
     }
 
@@ -108,7 +106,7 @@ public class NeuroSDK implements NeuroSDKInterface {
      * @param action the action to unregister
      * @return true if no action of the same id was previously registered.
      */
-    private boolean internalRegisterAction(@NotNull Action action) {
+    private boolean internalRegisterAction(Action action) {
         return registeredActions.putIfAbsent(action.getName(), action) == null;
     }
 
@@ -119,13 +117,13 @@ public class NeuroSDK implements NeuroSDKInterface {
      * @param action the action to unregister
      * @return false if it was not registered. true otherwise.
      */
-    private boolean internalUnregisterAction(@NotNull Action action) {
+    private boolean internalUnregisterAction(Action action) {
         return registeredActions.remove(action.getName(), action);
     }
 
     @Override
     @Nullable
-    public Action getAction(@NotNull String name) {
+    public Action getAction(String name) {
         registerLock.readLock().lock();
         Action action = registeredActions.get(name);
         registerLock.readLock().unlock();
@@ -134,8 +132,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    @NotNull
-    public List<Action> getActions(@NotNull List<String> names) {
+    public List<Action> getActions(List<String> names) {
         registerLock.readLock().lock();
 
         List<Action> actions = new ArrayList<>();
@@ -149,8 +146,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    @NotNull
-    public List<Action> getActions(@NotNull String... names) {
+    public List<Action> getActions(String... names) {
         return getActions(List.of(names));
     }
 
@@ -189,7 +185,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    public boolean sendContext(@NotNull String message, boolean silent) {
+    public boolean sendContext(String message, boolean silent) {
         if (!NeuroSDKState.CONNECTED.equals(this.state)) return false;
 
         return websocket.sendCommand("context", Map.of(
@@ -241,7 +237,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    public boolean registerActions(@NotNull Action... actions) {
+    public boolean registerActions(Action... actions) {
         return registerActions(List.of(actions));
     }
 
@@ -265,16 +261,16 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    public boolean unregisterActions(@NotNull Action... actions) {
+    public boolean unregisterActions(Action... actions) {
         return unregisterActions(List.of(actions));
     }
 
     @Override
     public boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull List<Action> actions,
+            List<Action> actions,
             ForceActionPriority priority) {
         List<String> actionNames = actions.stream().map(Action::getName).toList();
 
@@ -291,8 +287,8 @@ public class NeuroSDK implements NeuroSDKInterface {
     @Override
     public boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
-            @NotNull List<Action> actions,
+            String query,
+            List<Action> actions,
             ForceActionPriority priority) {
         return forceActions(state, query, false, actions, priority);
     }
@@ -300,16 +296,16 @@ public class NeuroSDK implements NeuroSDKInterface {
     @Override
     public boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull List<Action> actions) {
+            List<Action> actions) {
         return forceActions(state, query, ephemeral, actions, ForceActionPriority.DEFAULT);
     }
 
     @Override
     public boolean forceActions(
-            @NotNull String query,
-            @NotNull List<Action> actions,
+            String query,
+            List<Action> actions,
             ForceActionPriority priority) {
         return forceActions(null, query, actions, priority);
     }
@@ -317,55 +313,55 @@ public class NeuroSDK implements NeuroSDKInterface {
     @Override
     public boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull Action... actions) {
+            Action... actions) {
         return forceActions(state, query, ephemeral, List.of(actions));
     }
 
     @Override
     public boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
-            @NotNull List<Action> actions) {
+            String query,
+            List<Action> actions) {
         return forceActions(state, query, false, actions);
     }
 
     @Override
     public boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
-            @NotNull Action... actions) {
+            String query,
+            Action... actions) {
         return forceActions(state, query, List.of(actions));
     }
 
     @Override
     public boolean forceActions(
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull List<Action> actions) {
+            List<Action> actions) {
         return forceActions(null, query, ephemeral, actions);
     }
 
     @Override
     public boolean forceActions(
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull Action... actions) {
+            Action... actions) {
         return forceActions(query, ephemeral, List.of(actions));
     }
 
     @Override
     public boolean forceActions(
-            @NotNull String query,
-            @NotNull List<Action> actions) {
+            String query,
+            List<Action> actions) {
         return forceActions(query, false, actions);
     }
 
     @Override
     public boolean forceActions(
-            @NotNull String query,
-            @NotNull Action... actions) {
+            String query,
+            Action... actions) {
         return forceActions(query, List.of(actions));
     }
 
@@ -375,7 +371,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     }
 
     @Override
-    public boolean isEnable(@NotNull ProposedFeature feature) {
+    public boolean isEnable(ProposedFeature feature) {
         return this.enabledFeatures.contains(feature);
     }
 

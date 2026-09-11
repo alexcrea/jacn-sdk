@@ -1,6 +1,6 @@
 package xyz.alexcrea.jacn.example.listener;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.action.OptionMapAction;
@@ -19,6 +19,7 @@ import java.util.Scanner;
  * This is an example of how to use the neuro sdk with listener
  * For the listener part. see {@link xyz.alexcrea.jacn.example.listener.TicTacToeListener}
  */
+@NotNullByDefault
 public class TicTacToeExample2 {
 
     private final static Logger logger = LoggerFactory.getLogger(TicTacToeExample2.class);
@@ -79,7 +80,7 @@ public class TicTacToeExample2 {
     }
 
     // Assumed synchronized with game.
-    private static void gameLoop(@NotNull TicTacToeGame game, @NotNull NeuroSDK sdk) throws InterruptedException {
+    private static void gameLoop(TicTacToeGame game, NeuroSDK sdk) throws InterruptedException {
         boolean hasWin = false;
         Scanner sc = new Scanner(System.in);
 
@@ -138,9 +139,9 @@ public class TicTacToeExample2 {
      * @return If the play of neuro resulted in a win.
      * @throws InterruptedException cause by wait on game
      */
-    private static boolean forceNeuroPlay(@NotNull TicTacToeGame game,
-                                          @NotNull List<TicTacToeLocation> possibleLocations,
-                                          @NotNull NeuroSDK sdk) throws InterruptedException {
+    private static boolean forceNeuroPlay(TicTacToeGame game,
+                                          List<TicTacToeLocation> possibleLocations,
+                                          NeuroSDK sdk) throws InterruptedException {
         // Check Neuro's turn obviously
         if (game.getTurn() != TicTacToeCaseState.PLAYER2) {
             logger.info("It is not Neuro's turn. but she tried to play");

@@ -1,6 +1,6 @@
 package xyz.alexcrea.jacn.example.game;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * Just a normal tic-tac-toe game
  */
+@NotNullByDefault
 public class TicTacToeGame {
 
     private volatile TicTacToeCaseState turn;
@@ -23,7 +24,6 @@ public class TicTacToeGame {
         this.turn = TicTacToeCaseState.PLAYER1;
     }
 
-    @NotNull
     public List<TicTacToeLocation> getValidLocations() {
         ArrayList<TicTacToeLocation> result = new ArrayList<>();
 
@@ -49,7 +49,7 @@ public class TicTacToeGame {
         }
     }
 
-    public boolean play(@NotNull TicTacToeLocation loc, @NotNull TicTacToeCaseState player) {
+    public boolean play(TicTacToeLocation loc, TicTacToeCaseState player) {
         this.states[loc.row()][loc.column()] = player;
 
         return hasWon();
@@ -92,7 +92,7 @@ public class TicTacToeGame {
     }
 
 
-    public TicTacToeCaseState getState(@NotNull TicTacToeLocation loc) {
+    public TicTacToeCaseState getState(TicTacToeLocation loc) {
         return this.states[loc.row()][loc.column()];
     }
 
@@ -105,7 +105,7 @@ public class TicTacToeGame {
      *  O | O |
      *
      */
-    public @NotNull String gameState(boolean prefixed) {
+    public String gameState(boolean prefixed) {
         StringBuilder stb = new StringBuilder();
         if(prefixed){
             stb.append("Tic Tac Toe current game state:");
@@ -122,7 +122,7 @@ public class TicTacToeGame {
         return stb.toString();
     }
 
-    public @NotNull String gameState() {
+    public String gameState() {
         return gameState(true);
     }
 

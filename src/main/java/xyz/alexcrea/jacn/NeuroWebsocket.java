@@ -8,7 +8,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,37 +24,36 @@ import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
 import java.net.ConnectException;
 import java.net.URI;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * The websocket for the Neuro sdk api
  */
 @ApiStatus.Internal
+@NotNullByDefault
 public class NeuroWebsocket extends WebSocketClient {
 
     private final static Logger logger = LoggerFactory.getLogger(NeuroWebsocket.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final @NotNull NeuroSDK parent;
+    private final NeuroSDK parent;
 
-    private final @NotNull List<NeuroSDKListener> listeners;
+    private final List<NeuroSDKListener> listeners;
 
-    private final @NotNull Consumer<ServerHandshake> onWebsocketOpen;
-    private final @NotNull Consumer<ServerHandshake> onWebsocketOpenInternal;
+    private final Consumer<ServerHandshake> onWebsocketOpen;
+    private final Consumer<ServerHandshake> onWebsocketOpenInternal;
 
-    private final @NotNull Consumer<String> onWebsocketClose;
-    private final @NotNull Consumer<String> onWebsocketCloseInternal;
+    private final Consumer<String> onWebsocketClose;
+    private final Consumer<String> onWebsocketCloseInternal;
 
-    private final @NotNull Consumer<ConnectException> onConnectErrorInternal;
-    private final @NotNull Consumer<Exception> onWebsocketError;
+    private final Consumer<ConnectException> onConnectErrorInternal;
+    private final Consumer<Exception> onWebsocketError;
 
-    public NeuroWebsocket(@NotNull URI serverUri, @NotNull NeuroSDK parent, @NotNull NeuroSDKBuilder builder,
-                          @NotNull Consumer<ServerHandshake> onWebsocketOpenInternal,
-                          @NotNull Consumer<String> onWebsocketCloseInternal,
-                          @NotNull Consumer<ConnectException> onConnectErrorInternal) {
+    public NeuroWebsocket(URI serverUri, NeuroSDK parent, NeuroSDKBuilder builder,
+                          Consumer<ServerHandshake> onWebsocketOpenInternal,
+                          Consumer<String> onWebsocketCloseInternal,
+                          Consumer<ConnectException> onConnectErrorInternal) {
         super(serverUri);
         this.parent = parent;
 
@@ -92,7 +91,7 @@ public class NeuroWebsocket extends WebSocketClient {
         }
     }
 
-    private void actionExecuteFailed(@NotNull ActionRequest request, @Nullable String reason, @Nullable Exception e) {
+    private void actionExecuteFailed(ActionRequest request, @Nullable String reason, @Nullable Exception e) {
         StringBuilder report = new StringBuilder("Could not execute action request ").append(request.from().getName());
         if (reason != null) {
             report.append(": ").append(reason);
@@ -120,12 +119,12 @@ public class NeuroWebsocket extends WebSocketClient {
         sendResult(failed);
     }
 
-    private void executeActionRequest(@NotNull ActionRequest request) {
+    private void executeActionRequest(ActionRequest request) {
         // Do Action and get result
-        ActionResult result = null;
+        @Nullable ActionResult result = null;
         boolean fromCallback = false;
         try {
-            Function<@NotNull ActionRequest, @Nullable ActionResult> onResult = request.from().getOnResult();
+            var onResult = request.from().getOnResult();
             if (onResult != null) {
                 result = request.from().getOnResult().apply(request);
                 fromCallback = true;
@@ -162,7 +161,7 @@ public class NeuroWebsocket extends WebSocketClient {
         // Do after result
         try {
             if (fromCallback) {
-                BiConsumer<ActionRequest, ActionResult> onResult = request.from().getAfterResult();
+                var onResult = request.from().getAfterResult();
                 if (onResult != null) {
                     onResult.accept(request, result);
                 }
@@ -199,7 +198,7 @@ public class NeuroWebsocket extends WebSocketClient {
         }
     }
 
-    private void handleCommand(@NotNull String message, @NotNull String command, @NotNull HashMap<?, ?> map) {
+    private void handleCommand(String message, String command, HashMap<?, ?> map) {
         switch (command) {
             case "action":
                 handleIngoingAction(message, map);
@@ -218,7 +217,7 @@ public class NeuroWebsocket extends WebSocketClient {
         }
     }
 
-    private void handleIngoingAction(@NotNull String message, @NotNull HashMap<?, ?> map) {
+    private void handleIngoingAction(String message, HashMap<?, ?> map) {
         Object dataObj = map.get("data");
         if (!(dataObj instanceof Map<?, ?> data)) {
             sendInvalidFeedbackUnknownID(message, "Could not find command data" +
@@ -232,7 +231,7 @@ public class NeuroWebsocket extends WebSocketClient {
         executeActionRequest(request);
     }
 
-    private void sendInvalidFeedbackUnknownID(@NotNull String message, @NotNull String errorToSend, @Nullable Exception e) {
+    private void sendInvalidFeedbackUnknownID(String message, String errorToSend, @Nullable Exception e) {
         String id = findID(message);
         if (id == null) {
             logger.error(errorToSend, e);
@@ -242,7 +241,7 @@ public class NeuroWebsocket extends WebSocketClient {
         sendInvalidFeedbackKnownID(id, errorToSend, e);
     }
 
-    private void sendInvalidFeedbackKnownID(@NotNull String id, @NotNull String errorToSend, @Nullable Exception e) {
+    private void sendInvalidFeedbackKnownID(String id, String errorToSend, @Nullable Exception e) {
         ActionResult failedResult = new ActionResult(id, false, errorToSend);
 
         if (!sendResult(failedResult)) {
@@ -255,7 +254,7 @@ public class NeuroWebsocket extends WebSocketClient {
     }
 
     @Nullable
-    private ActionRequest findRequest(@NotNull Map<?, ?> map, @NotNull String message) {
+    private ActionRequest findRequest(Map<?, ?> map, String message) {
         Object idObj = map.get("id");
         if (idObj == null) {
             sendInvalidFeedbackUnknownID(message, "Could not find the id field on the message" +
@@ -344,7 +343,7 @@ public class NeuroWebsocket extends WebSocketClient {
         return message.substring(startIndex, badEndIndex);
     }
 
-    public boolean sendResult(@NotNull ActionResult result) {
+    public boolean sendResult(ActionResult result) {
         Map<String, Object> toSend = new HashMap<>();
         toSend.put("id", result.id());
         toSend.put("success", result.success());
@@ -399,7 +398,7 @@ public class NeuroWebsocket extends WebSocketClient {
         }
     }
 
-    public boolean sendCommand(@NotNull String command, @Nullable Map<String, Object> data, boolean bypassConnected) {
+    public boolean sendCommand(String command, @Nullable Map<String, Object> data, boolean bypassConnected) {
         if (!bypassConnected && !NeuroSDKState.CONNECTED.equals(this.parent.getState())) return false;
 
         HashMap<String, Object> toSendMap = new HashMap<>();
@@ -417,7 +416,7 @@ public class NeuroWebsocket extends WebSocketClient {
         return true;
     }
 
-    public boolean sendCommand(@NotNull String command, @Nullable Map<String, Object> data) {
+    public boolean sendCommand(String command, @Nullable Map<String, Object> data) {
         return sendCommand(command, data, false);
     }
 
