@@ -1,5 +1,8 @@
 package xyz.alexcrea.jacn.sdk;
 
+import org.jetbrains.annotations.NotNullByDefault;
+
+@NotNullByDefault
 public enum ForceActionPriority {
 
     /**

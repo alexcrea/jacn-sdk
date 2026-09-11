@@ -3,7 +3,7 @@ package xyz.alexcrea.jacn.action;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -18,17 +18,18 @@ import java.util.function.Function;
  * @param <T> Type of option's values
  */
 @SuppressWarnings({"unused"})
+@NotNullByDefault
 public class OptionMapAction<T> extends Action {
 
     private final static ObjectMapper mapper = new ObjectMapper();
 
-    private final @NotNull Map<String, T> valueMap;
-    private final @NotNull ObjectNode rootNode;
-    private final @NotNull ArrayNode options;
+    private final Map<String, T> valueMap;
+    private final ObjectNode rootNode;
+    private final ArrayNode options;
 
-    public OptionMapAction(@NotNull String name, @NotNull String description,
+    public OptionMapAction(String name, String description,
                            @Nullable Map<String, T> options,
-                           @Nullable Function<@NotNull ActionRequest, ActionResult> onResult) {
+                           @Nullable Function<ActionRequest, @Nullable ActionResult> onResult) {
         super(name, description, onResult);
         this.valueMap = Objects.requireNonNullElseGet(options, HashMap::new);
 
@@ -38,18 +39,19 @@ public class OptionMapAction<T> extends Action {
         super.setSchema(this.rootNode);
     }
 
-    public OptionMapAction(@NotNull String name, @NotNull String description,
-                           @Nullable Function<@NotNull ActionRequest, ActionResult> onResult) {
+    public OptionMapAction(String name, String description,
+                           @Nullable Function<ActionRequest, @Nullable ActionResult> onResult) {
         this(name, description, null, onResult);
     }
 
 
-    public OptionMapAction(@NotNull String name, @NotNull String description) {
+    public OptionMapAction(String name, String description) {
         this(name, description, null);
     }
 
-    private static <T> @NotNull ObjectNode createObjectListSchema(
-            @NotNull Map<String, T> values) {
+    private static <T> ObjectNode createObjectListSchema(
+            Map<String, T> values
+    ) {
 
         ObjectNode jsonRoot = mapper.createObjectNode();
         jsonRoot.put("type", "object");
@@ -80,7 +82,7 @@ public class OptionMapAction<T> extends Action {
      * @param value  The mapped value of this option
      * @return if this option was already registered
      */
-    public boolean setOption(@NotNull String option, @NotNull T value) {
+    public boolean setOption(String option, T value) {
         T previous = this.valueMap.put(option, value);
         if (previous == null) {
             this.options.add(option);
@@ -99,7 +101,7 @@ public class OptionMapAction<T> extends Action {
      * @param option the option key to remove
      * @return if the option was present and removed
      */
-    public boolean removeOption(@NotNull String option) {
+    public boolean removeOption(String option) {
         if (this.valueMap.remove(option) == null)
             return false;
 
@@ -140,7 +142,7 @@ public class OptionMapAction<T> extends Action {
      * @return the value associated to it. null if absent
      */
     @Nullable
-    public T get(@NotNull String option) {
+    public T get(String option) {
         return this.valueMap.get(option);
     }
 
@@ -151,7 +153,7 @@ public class OptionMapAction<T> extends Action {
      * @return the value associated to it. null if absent or could not find the value.
      */
     @Nullable
-    public T get(@NotNull ActionRequest request) {
+    public T get(ActionRequest request) {
         if (request.data() != null) {
             return get(request.data().get("options").asText());
         }

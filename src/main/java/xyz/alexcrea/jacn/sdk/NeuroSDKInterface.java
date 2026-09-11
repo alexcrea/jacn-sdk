@@ -1,6 +1,6 @@
 package xyz.alexcrea.jacn.sdk;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
@@ -11,6 +11,7 @@ import java.util.List;
  * Represent a class that can interact with the Neuro SDK
  */
 @SuppressWarnings({"unused"})
+@NotNullByDefault
 public interface NeuroSDKInterface {
 
     /**
@@ -18,14 +19,14 @@ public interface NeuroSDKInterface {
      *
      * @return the game name
      */
-    @NotNull String getGameName();
+    String getGameName();
 
     /**
      * Get the current state of the Neuro sdk
      *
      * @return the Neuro sdk state
      */
-    @NotNull NeuroSDKState getState();
+    NeuroSDKState getState();
 
     /**
      * Get an action by its name.
@@ -34,7 +35,7 @@ public interface NeuroSDKInterface {
      * @return the action registered with this name. null if not registered
      */
     @Nullable
-    Action getAction(@NotNull String name);
+    Action getAction(String name);
 
     /**
      * Get a list of actions from a list of action names.
@@ -46,8 +47,7 @@ public interface NeuroSDKInterface {
      * @return List of actions related to name.
      * as big or smaller than the provided list of names
      */
-    @NotNull
-    List<Action> getActions(@NotNull List<String> names);
+    List<Action> getActions(List<String> names);
 
     /**
      * Get a list of actions from a list of action names.
@@ -59,8 +59,7 @@ public interface NeuroSDKInterface {
      * @return List of actions related to name.
      * as big or smaller than the provided list of names
      */
-    @NotNull
-    List<Action> getActions(@NotNull String... names);
+    List<Action> getActions(String... names);
 
     /**
      * This function is used to let Neuro know about something happening in game
@@ -73,7 +72,7 @@ public interface NeuroSDKInterface {
      *                unless she is busy talking about someone else or to chat
      * @return if the command was successful
      */
-    boolean sendContext(@NotNull String message, boolean silent);
+    boolean sendContext(String message, boolean silent);
 
     /**
      * Register a list of actions
@@ -94,7 +93,7 @@ public interface NeuroSDKInterface {
      * @param actions list of action to register
      * @return if the command was successful
      */
-    boolean registerActions(@NotNull Action... actions);
+    boolean registerActions(Action... actions);
 
     /**
      * Unregister a list of actions.
@@ -110,7 +109,7 @@ public interface NeuroSDKInterface {
      * @param actions list of action to register
      * @return if the command was successful
      */
-    boolean unregisterActions(@NotNull Action... actions);
+    boolean unregisterActions(Action... actions);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.
@@ -131,9 +130,9 @@ public interface NeuroSDKInterface {
      */
     boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull List<Action> actions,
+            List<Action> actions,
             ForceActionPriority priority);
 
     /**
@@ -152,8 +151,8 @@ public interface NeuroSDKInterface {
      */
     boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
-            @NotNull List<Action> actions,
+            String query,
+            List<Action> actions,
             ForceActionPriority priority);
 
     /**
@@ -174,9 +173,9 @@ public interface NeuroSDKInterface {
      */
     boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull List<Action> actions);
+            List<Action> actions);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.
@@ -190,8 +189,8 @@ public interface NeuroSDKInterface {
      * @return if the command was successful
      */
     boolean forceActions(
-            @NotNull String query,
-            @NotNull List<Action> actions,
+            String query,
+            List<Action> actions,
             ForceActionPriority priority);
 
     /**
@@ -212,9 +211,9 @@ public interface NeuroSDKInterface {
      */
     boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull Action... actions);
+            Action... actions);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.
@@ -232,8 +231,8 @@ public interface NeuroSDKInterface {
      */
     boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
-            @NotNull List<Action> actions);
+            String query,
+            List<Action> actions);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.
@@ -251,8 +250,8 @@ public interface NeuroSDKInterface {
      */
     boolean forceActions(
             @Nullable String state,
-            @NotNull String query,
-            @NotNull Action... actions);
+            String query,
+            Action... actions);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.
@@ -268,9 +267,9 @@ public interface NeuroSDKInterface {
      * @return if the command was successful
      */
     boolean forceActions(
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull List<Action> actions);
+            List<Action> actions);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.
@@ -286,9 +285,9 @@ public interface NeuroSDKInterface {
      * @return if the command was successful
      */
     boolean forceActions(
-            @NotNull String query,
+            String query,
             boolean ephemeral,
-            @NotNull Action... actions);
+            Action... actions);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.
@@ -302,8 +301,8 @@ public interface NeuroSDKInterface {
      * @return if the command was successful
      */
     boolean forceActions(
-            @NotNull String query,
-            @NotNull List<Action> actions);
+            String query,
+            List<Action> actions);
 
     /**
      * This force Neuro to execute one of the following actions as soon as possible.
@@ -317,8 +316,8 @@ public interface NeuroSDKInterface {
      * @return if the command was successful
      */
     boolean forceActions(
-            @NotNull String query,
-            @NotNull Action... actions);
+            String query,
+            Action... actions);
 
     /**
      * Get all registered actions
@@ -333,6 +332,14 @@ public interface NeuroSDKInterface {
      * @param feature the feature to test if enable
      * @return if the provided feature is enabled
      */
-    boolean isEnable(@NotNull ProposedFeature feature);
+    boolean isEnable(ProposedFeature feature);
+
+    /**
+     * Get the current character playing the game.
+     * <p>
+     * If not initialized, default to {@link Character#DEFAULT}.
+     * @return The character currently playing
+     */
+    Character getCharacter();
 
 }

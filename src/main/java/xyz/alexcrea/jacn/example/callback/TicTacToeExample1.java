@@ -1,7 +1,8 @@
 package xyz.alexcrea.jacn.example.callback;
 
 import org.java_websocket.handshake.ServerHandshake;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.action.Action;
@@ -24,6 +25,7 @@ import java.util.Scanner;
  * This is an example of how to use the neuro sdk with only callbacks.
  * This example is currently dirty and should get a rewrite. it is recommended to see {@link xyz.alexcrea.jacn.example.listener.TicTacToeExample2} instead.
  */
+@NotNullByDefault
 public class TicTacToeExample1 {
 
     private final static Logger logger = LoggerFactory.getLogger(TicTacToeExample1.class);
@@ -46,7 +48,7 @@ public class TicTacToeExample1 {
     }
 
     private final TicTacToeGame game = new TicTacToeGame();
-    private volatile NeuroSDK sdk;
+    private volatile @Nullable NeuroSDK sdk;
 
     public void setSdk(NeuroSDK sdk) throws InterruptedException {
         this.sdk = sdk;
@@ -62,9 +64,15 @@ public class TicTacToeExample1 {
         startGame();
     }
 
+    private NeuroSDK getSdk() {
+        var sdk = this.sdk;
+        if(sdk == null) throw new IllegalStateException("Neuro sdk not yet initialized");
+        return sdk;
+    }
+
     // Create one action per position
     // Can probably
-    private @NotNull List<Action> getActionOnConnect() {
+    private List<Action> getActionOnConnect() {
         List<Action> actions = new ArrayList<>();
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
@@ -86,32 +94,32 @@ public class TicTacToeExample1 {
 
     // Called when neuro request an action
     private ActionResult neuroTicTacToeAction(
-            @NotNull TicTacToeLocation loc,
-            @NotNull ActionRequest request) {
+            TicTacToeLocation loc,
+            ActionRequest request) {
         // Neuro tried to play.
         if (game.getState(loc) != TicTacToeCaseState.EMPTY) {
             // But it's on a case already used.
             // Just to be sure, unregister requested action
-            sdk.registerActions(request.from());
+            getSdk().registerActions(request.from());
 
             // And send a failure result with reason
             return new ActionResult(request, false, "Location is already used by a player.");
         }
 
-        if (TicTacToeUtil.tryPlay(game, sdk, loc, TicTacToeCaseState.PLAYER2)) {
-            // end turn
-            synchronized (game) {
-                game.notify();
-            }
-
-            // And say neuro she could play
-            return new ActionResult(request, true, "You just played on " +
-                    "row " + (loc.row() + 1) + " and column " + (loc.column() + 1));
-        } else {
+        var error = TicTacToeUtil.tryPlay(game, getSdk(), loc, TicTacToeCaseState.PLAYER2);
+        if(error.isPresent()){
             // And neuro could not play
             return new ActionResult(request, false, "It is not your turn");
         }
 
+        // end turn
+        synchronized (game) {
+            game.notify();
+        }
+
+        // Finally respond neuro she was able to play
+        return new ActionResult(request, true, "You just played on " +
+                "row " + (loc.row() + 1) + " and column " + (loc.column() + 1));
     }
 
     public void onConnect(ServerHandshake handshake) {
@@ -136,7 +144,7 @@ public class TicTacToeExample1 {
             List<TicTacToeLocation> locations = game.getValidLocations();
             if (locations.isEmpty()) break;
 
-            hasWon = TicTacToeUtil.cliPlay(game, sdk, sc, TicTacToeCaseState.PLAYER1);
+            hasWon = TicTacToeUtil.cliPlay(game, getSdk(), sc, TicTacToeCaseState.PLAYER1);
             if (hasWon) break;
             locations = game.getValidLocations();
             if (locations.isEmpty()) break;
@@ -149,13 +157,14 @@ public class TicTacToeExample1 {
         }
 
         sc.close();
-        sdk.close();
+        getSdk().close();
     }
 
-    private boolean neuroPlay(@NotNull TicTacToeCaseState state) throws InterruptedException {
+    private boolean neuroPlay(TicTacToeCaseState state) throws InterruptedException {
         // we own the game object so neuro can't play currently
         synchronized (game) {
             // We force action all the possible actions to make her select one of them
+            NeuroSDK sdk = getSdk();
             sdk.forceActions(game.gameState(), "It is now your turn. " +
                             "You are currently player as the " + state.getPlayerRepresentation() + ". " +
                             "Please play on one of the empty Tic tac Toe case.",

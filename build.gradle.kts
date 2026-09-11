@@ -7,23 +7,23 @@ plugins {
     // Maven publish
     `maven-publish`
     signing
-    id("cn.lalaki.central").version("2.0.2")
+    id("cn.lalaki.central").version("2.0.9")
 }
 
 group = "xyz.alexcrea.jacn"
-version = "1.2.0"
+version = "1.3.0"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly("org.jetbrains:annotations:24.0.1")
+    compileOnly("org.jetbrains:annotations:26.1.0")
 
-    implementation("org.java-websocket:Java-WebSocket:1.5.7")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
+    implementation("org.java-websocket:Java-WebSocket:1.6.0")
+    implementation("tools.jackson.core:jackson-databind:3.2.2")
 
-    implementation("com.networknt:json-schema-validator:1.5.4")
+    implementation("com.networknt:json-schema-validator:1.5.4")//TODO update properly to
 
     // Test dependencies
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -44,6 +44,14 @@ val javadocJar by tasks.creating(Jar::class) {
     description = "Assembles Javadoc JAR"
     archiveClassifier.set("javadoc")
     from(tasks.named("javadoc"))
+}
+
+// Force compile target of java 21 for retro compatibility
+tasks.withType<JavaCompile>().configureEach {
+    sourceCompatibility = "21"
+    targetCompatibility = "21"
+
+    options.encoding = "UTF-8"
 }
 
 // ------------------------------------

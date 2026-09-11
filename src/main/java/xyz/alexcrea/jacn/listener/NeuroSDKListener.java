@@ -1,16 +1,18 @@
 package xyz.alexcrea.jacn.listener;
 
 import org.java_websocket.handshake.ServerHandshake;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.sdk.Character;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 
 /**
  * Represent a listener to even on the Neuro SDK
  */
 @SuppressWarnings({"unused"})
+@NotNullByDefault
 public interface NeuroSDKListener {
 
     /**
@@ -19,12 +21,12 @@ public interface NeuroSDKListener {
      * @param neuroSDK the neuro sdk
      * @return if the neuro sdk was successfully set. (should be false only if it was already present)
      */
-    boolean setNeuroSDK(@NotNull NeuroSDK neuroSDK);
+    boolean setNeuroSDK(NeuroSDK neuroSDK);
 
     /**
      * Get the current Neuro sdk.
      *
-     * @return the current neuro sdk. null is not yet set.
+     * @return the current neuro sdk. null is not yet initialized.
      */
     @Nullable
     NeuroSDK getSDK();
@@ -35,7 +37,7 @@ public interface NeuroSDKListener {
      *
      * @param handshake the handshake of this connection
      */
-    void onConnect(@NotNull ServerHandshake handshake);
+    void onConnect(ServerHandshake handshake);
 
     /**
      * Called when the websocket got closed for any reason.
@@ -45,7 +47,7 @@ public interface NeuroSDKListener {
      * @param remote if the connection was close by the remote connection
      * @param code   the close code
      */
-    void onClose(@NotNull String reason, boolean remote, int code);
+    void onClose(String reason, boolean remote, int code);
 
     /**
      * Called when a websocket exception has happened.
@@ -53,7 +55,7 @@ public interface NeuroSDKListener {
      *
      * @param exception the exception that caused
      */
-    void onError(@NotNull Exception exception);
+    void onError(Exception exception);
 
     /**
      * Called when Neuro request an action.
@@ -73,7 +75,7 @@ public interface NeuroSDKListener {
      * or null if the listener do not handle this Action Request
      */
     @Nullable
-    ActionResult onActionRequest(@NotNull ActionRequest request, @NotNull NeuroSDK sdk);
+    ActionResult onActionRequest(ActionRequest request, NeuroSDK sdk);
 
     /**
      * Called after {@link #onActionRequest} of this listener returned a non-null result.
@@ -83,6 +85,12 @@ public interface NeuroSDKListener {
      * @param result  the returned result
      * @param sdk     the Neuro SDK
      */
-    void onAfterResult(@NotNull ActionRequest request, @NotNull ActionResult result, @NotNull NeuroSDK sdk);
+    void onAfterResult(ActionRequest request, ActionResult result, NeuroSDK sdk);
+
+    /**
+     * Called when startup is triggered, this cause a change of character.
+     * @param character The character playing the game.
+     */
+    void onStartup(Character character);
 
 }

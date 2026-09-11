@@ -2,11 +2,12 @@ package xyz.alexcrea.jacn.listener;
 
 import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.sdk.Character;
 import xyz.alexcrea.jacn.sdk.ForceActionPriority;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 import xyz.alexcrea.jacn.sdk.NeuroSDKInterface;
@@ -21,13 +22,14 @@ import java.util.List;
  * and also allow to call sdk function from here
  */
 @SuppressWarnings({"unused"})
+@NotNullByDefault
 public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKInterface {
 
-    private NeuroSDK sdk;
+    private @Nullable NeuroSDK sdk = null;
 
     @Override
     @ApiStatus.Internal
-    public final boolean setNeuroSDK(@NotNull NeuroSDK sdk) {
+    public final boolean setNeuroSDK(NeuroSDK sdk) {
         if (this.sdk != null) return false;
 
         this.sdk = sdk;
@@ -40,13 +42,13 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     }
 
     @Override
-    public @Nullable ActionResult onActionRequest(@NotNull ActionRequest request, @NotNull NeuroSDK sdk) {
+    public @Nullable ActionResult onActionRequest(ActionRequest request, NeuroSDK sdk) {
         // Empty but let it be overridden
         return null;
     }
 
     @Override
-    public void onAfterResult(@NotNull ActionRequest request, @NotNull ActionResult result, @NotNull NeuroSDK sdk) {
+    public void onAfterResult(ActionRequest request, ActionResult result, NeuroSDK sdk) {
         // Empty but let it be overridden
     }
 
@@ -57,7 +59,7 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
      * @param handshake the handshake of this connection
      * @param sdk       the sdk instance related to this connection
      */
-    public void onConnectSuccess(@NotNull ServerHandshake handshake, @NotNull NeuroSDK sdk) {
+    public void onConnectSuccess(ServerHandshake handshake, NeuroSDK sdk) {
 
     }
 
@@ -69,7 +71,7 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
      * @param handshake the handshake of this connection
      * @param sdk       the sdk instance related to this connection
      */
-    public void onConnectFailed(@NotNull ServerHandshake handshake, @NotNull NeuroSDK sdk) {
+    public void onConnectFailed(ServerHandshake handshake, NeuroSDK sdk) {
 
     }
 
@@ -82,7 +84,7 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
      * @param code   the close code
      * @param sdk    the sdk instance related to this connection
      */
-    public void onClose(@NotNull String reason, boolean remote, int code, @NotNull NeuroSDK sdk) {
+    public void onClose(String reason, boolean remote, int code, NeuroSDK sdk) {
 
     }
 
@@ -93,7 +95,7 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
      * @param exception the exception
      * @param sdk       the sdk instance related to this connection
      */
-    public void onError(@NotNull Exception exception, @NotNull NeuroSDK sdk) {
+    public void onError(Exception exception, NeuroSDK sdk) {
 
     }
 
@@ -105,12 +107,12 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
      * @param exception the exception
      * @param sdk       the sdk instance related to this connection
      */
-    public void onConnectError(@NotNull ConnectException exception, @NotNull NeuroSDK sdk) {
+    public void onConnectError(ConnectException exception, NeuroSDK sdk) {
 
     }
 
     @Override
-    public final void onConnect(@NotNull ServerHandshake handshake) {
+    public final void onConnect(ServerHandshake handshake) {
         if (this.sdk == null) return;
 
         int status = handshake.getHttpStatus();
@@ -123,14 +125,14 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     }
 
     @Override
-    public final void onClose(@NotNull String reason, boolean remote, int code) {
+    public final void onClose(String reason, boolean remote, int code) {
         if (this.sdk == null) return;
 
         onClose(reason, remote, code, this.sdk);
     }
 
     @Override
-    public final void onError(@NotNull Exception exception) {
+    public final void onError(Exception exception) {
         if (this.sdk == null) return;
 
         onError(exception, this.sdk);
@@ -140,37 +142,42 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     }
 
     @Override
-    public final @NotNull String getGameName() {
+    public void onStartup(Character character) {
+
+    }
+
+    @Override
+    public final String getGameName() {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.getGameName();
     }
 
     @Override
-    public final @NotNull NeuroSDKState getState() {
+    public final NeuroSDKState getState() {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.getState();
     }
 
     @Override
-    public final @Nullable Action getAction(@NotNull String name) {
+    public final @Nullable Action getAction(String name) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.getAction(name);
     }
 
     @Override
-    public final @NotNull List<Action> getActions(@NotNull List<String> names) {
+    public final List<Action> getActions(List<String> names) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.getActions(names);
     }
 
     @Override
-    public final @NotNull List<Action> getActions(@NotNull String... names) {
+    public final List<Action> getActions(String ... names) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.getActions(names);
     }
 
     @Override
-    public final boolean sendContext(@NotNull String message, boolean silent) {
+    public final boolean sendContext(String message, boolean silent) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.sendContext(message, silent);
     }
@@ -182,7 +189,7 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     }
 
     @Override
-    public final boolean registerActions(@NotNull Action... actions) {
+    public final boolean registerActions(Action... actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.registerActions(actions);
     }
@@ -194,73 +201,73 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     }
 
     @Override
-    public final boolean unregisterActions(@NotNull Action... actions) {
+    public final boolean unregisterActions(Action... actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.unregisterActions(actions);
     }
 
     @Override
-    public boolean forceActions(@NotNull String query, @NotNull List<Action> actions, ForceActionPriority priority) {
+    public boolean forceActions(String query, List<Action> actions, ForceActionPriority priority) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(query, actions, priority);
     }
 
     @Override
-    public boolean forceActions(@Nullable String state, @NotNull String query, @NotNull List<Action> actions, ForceActionPriority priority) {
+    public boolean forceActions(@Nullable String state, String query, List<Action> actions, ForceActionPriority priority) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(state, query, actions, priority);
     }
 
     @Override
-    public boolean forceActions(@Nullable String state, @NotNull String query, boolean ephemeral, @NotNull List<Action> actions, ForceActionPriority priority) {
+    public boolean forceActions(@Nullable String state, String query, boolean ephemeral, List<Action> actions, ForceActionPriority priority) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(state, query, ephemeral, actions, priority);
     }
 
     @Override
-    public final boolean forceActions(@Nullable String state, @NotNull String query, boolean ephemeral, @NotNull List<Action> actions) {
+    public final boolean forceActions(@Nullable String state, String query, boolean ephemeral, List<Action> actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(state, query, ephemeral, actions);
     }
 
     @Override
-    public final boolean forceActions(@Nullable String state, @NotNull String query, boolean ephemeral, @NotNull Action... actions) {
+    public final boolean forceActions(@Nullable String state, String query, boolean ephemeral, Action... actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(state, query, ephemeral, actions);
     }
 
     @Override
-    public final boolean forceActions(@Nullable String state, @NotNull String query, @NotNull List<Action> actions) {
+    public final boolean forceActions(@Nullable String state, String query, List<Action> actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(state, query, actions);
     }
 
     @Override
-    public final boolean forceActions(@Nullable String state, @NotNull String query, @NotNull Action... actions) {
+    public final boolean forceActions(@Nullable String state, String query, Action... actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(state, query, actions);
     }
 
     @Override
-    public final boolean forceActions(@NotNull String query, boolean ephemeral, @NotNull List<Action> actions) {
+    public final boolean forceActions(String query, boolean ephemeral, List<Action> actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(query, ephemeral, actions);
     }
 
     @Override
-    public final boolean forceActions(@NotNull String query, boolean ephemeral, @NotNull Action... actions) {
+    public final boolean forceActions(String query, boolean ephemeral, Action ... actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(query, ephemeral, actions);
     }
 
     @Override
-    public final boolean forceActions(@NotNull String query, @NotNull List<Action> actions) {
+    public final boolean forceActions(String query, List<Action> actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(query, actions);
     }
 
     @Override
-    public final boolean forceActions(@NotNull String query, @NotNull Action... actions) {
+    public final boolean forceActions(String query, Action ... actions) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.forceActions(query, actions);
     }
@@ -272,9 +279,15 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     }
 
     @Override
-    public boolean isEnable(@NotNull ProposedFeature feature) {
+    public boolean isEnable(ProposedFeature feature) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.isEnable(feature);
+    }
+
+    @Override
+    public Character getCharacter() {
+        if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.getCharacter();
     }
 
 }

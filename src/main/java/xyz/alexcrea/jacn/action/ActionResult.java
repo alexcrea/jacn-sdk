@@ -1,6 +1,6 @@
 package xyz.alexcrea.jacn.action;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -16,8 +16,9 @@ import org.jetbrains.annotations.Nullable;
  *                (e.g. "Remember to not share this with anyone."). This information will be directly received by Neuro.
  */
 @SuppressWarnings({"unused"})
+@NotNullByDefault
 public record ActionResult(
-        @NotNull String id,
+        String id,
         boolean success,
         @Nullable String message
 ) {
@@ -29,12 +30,13 @@ public record ActionResult(
      * @param success whether the action was successful.
      *                If this is false and this action if part of an action force,
      *                the whole actions force will be immediately retried by Neuro.
+     *                It is retried a limited amount of time for forced action. therefore safe to set it to false
      * @param message a plaintext message that describe what happened when the action was executed.
      *                if not successful, this can either be empty,
      *                or provide a small context to Neuro regarding the action she just took
      *                (e.g. "Remember to not share this with anyone."). This information will be directly received by Neuro.
      */
-    public ActionResult(@NotNull ActionRequest request, boolean success, @Nullable String message) {
+    public ActionResult(ActionRequest request, boolean success, @Nullable String message) {
         this(request.id(), success, message);
     }
 
@@ -47,7 +49,7 @@ public record ActionResult(
      *                If this is false and this action if part of an action force,
      *                the whole actions force will be immediately retried by Neuro.
      */
-    public ActionResult(@NotNull String id, boolean success) {
+    public ActionResult(String id, boolean success) {
         this(id, success, null);
     }
 
@@ -60,7 +62,7 @@ public record ActionResult(
      *                If this is false and this action if part of an action force,
      *                the whole actions force will be immediately retried by Neuro.
      */
-    public ActionResult(@NotNull ActionRequest request, boolean success) {
+    public ActionResult(ActionRequest request, boolean success) {
         this(request.id(), success, null);
     }
 

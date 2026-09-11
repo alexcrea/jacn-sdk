@@ -1,16 +1,18 @@
 package xyz.alexcrea.jacn.example.game;
 
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
  * Function common to the two example that I did not wanted to introduce into the game class
  */
+@NotNullByDefault
 public class TicTacToeUtil {
 
     /**
@@ -22,8 +24,8 @@ public class TicTacToeUtil {
      * @param state the case state owned by the playing player
      * @return if this play caused a win.
      */
-    public static boolean cliPlay(@NotNull TicTacToeGame game, @NotNull NeuroSDK sdk,
-                                  @NotNull Scanner sc, @NotNull TicTacToeCaseState state) {
+    public static boolean cliPlay(TicTacToeGame game, NeuroSDK sdk,
+                                  Scanner sc, TicTacToeCaseState state) {
         System.out.println(game.gameState());
 
         System.out.println("It is your turn. please input the row and column as \"row column\"");
@@ -42,8 +44,8 @@ public class TicTacToeUtil {
      * @param state the case state owned by the playing player
      * @return if this play caused a win.
      */
-    private static boolean readCliPlay(@NotNull TicTacToeGame game, @NotNull NeuroSDK sdk,
-                                       @NotNull Scanner sc, @NotNull TicTacToeCaseState state) {
+    private static boolean readCliPlay(TicTacToeGame game, NeuroSDK sdk,
+                                       Scanner sc, TicTacToeCaseState state) {
         while (true) {
             String line = sc.nextLine();
             String[] vals = line.trim().split(" ");
@@ -70,8 +72,9 @@ public class TicTacToeUtil {
                 continue;
             }
 
-            if (!tryPlay(game, sdk, loc, state)) {
-                System.out.println("It is not your turn ? somehow ?");
+            var error = tryPlay(game, sdk, loc, state);
+            if (error.isPresent()) {
+                System.out.println(error.get());
                 return false;
             }
             sdk.sendContext("Player " + TicTacToeCaseState.PLAYER1.getPlayerRepresentation() + " just played " +
@@ -100,13 +103,13 @@ public class TicTacToeUtil {
      * @param sdk   the neuro sdk
      * @param loc   the location to play
      * @param state the state owned by the player.
-     * @return true if could play. false otherwise.
+     * @return an optional containing the error message, empty if no error happened
      */
-    public static boolean tryPlay(@NotNull TicTacToeGame game, @NotNull NeuroSDK sdk,
-                                  @NotNull TicTacToeLocation loc, @NotNull TicTacToeCaseState state) {
+    public static Optional<String> tryPlay(TicTacToeGame game, NeuroSDK sdk,
+                                           TicTacToeLocation loc, TicTacToeCaseState state) {
         // Check player's turn
         if (game.getTurn() != state) {
-            return false;
+            return Optional.of("It is not your turn");
         }
 
         // Try to play
@@ -117,7 +120,7 @@ public class TicTacToeUtil {
                 sdk.unregisterActions(action);
             }
 
-            return true;
+            return Optional.empty();
         }
 
         // Remove the action related to this location
@@ -126,7 +129,7 @@ public class TicTacToeUtil {
 
         // Set to the other player turn
         game.switchTurn();
-        return true;
+        return Optional.empty();
     }
 
 }

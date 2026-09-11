@@ -1,20 +1,21 @@
 package xyz.alexcrea.jacn.example.game;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNullByDefault;
 
+@NotNullByDefault
 public enum TicTacToeCaseState {
     EMPTY(" "),
     PLAYER1("X"),
     PLAYER2("O"),
     ;
 
-    private final @NotNull String PlayerRepresentation;
+    private final String PlayerRepresentation;
 
-    TicTacToeCaseState(@NotNull String PlayerRepresentation) {
+    TicTacToeCaseState(String PlayerRepresentation) {
         this.PlayerRepresentation = PlayerRepresentation;
     }
 
-    public @NotNull String getPlayerRepresentation() {
+    public String getPlayerRepresentation() {
         return PlayerRepresentation;
     }
 

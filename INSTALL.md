@@ -23,9 +23,9 @@ add jacn to your dependency
 (please check latest version):
 ```kotlin
 dependencies {
-    implementation("xyz.alexcrea.jacn:jacn_sdk:1.2.0") // check latest version
+    implementation("xyz.alexcrea.jacn:jacn_sdk:1.3.0") // check latest version
 
-    implementation("org.jetbrains:annotations:24.0.1") // recommended but optional. from maven central
+    implementation("org.jetbrains:annotations:26.1.0") // recommended but optional. from maven central
     ... // rest of your dependency
 }
 ```
@@ -39,7 +39,7 @@ add jacn to your dependency
 <dependency>
     <groupId>xyz.alexcrea.jacn</groupId>
     <artifactId>jacn_sdk</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 It is also recommended but optional that you add jetbrain's annotation from
@@ -48,7 +48,7 @@ It is also recommended but optional that you add jetbrain's annotation from
 <dependency>
     <groupId>org.jetbrains</groupId>
     <artifactId>annotations</artifactId>
-    <version>24.0.1</version>
+    <version>26.1.0</version>
 </dependency>
 ```
 

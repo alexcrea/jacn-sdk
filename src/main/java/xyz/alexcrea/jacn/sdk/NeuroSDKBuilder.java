@@ -1,10 +1,7 @@
 package xyz.alexcrea.jacn.sdk;
 
 import org.java_websocket.handshake.ServerHandshake;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NonBlocking;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.alexcrea.jacn.action.Action;
@@ -22,6 +19,7 @@ import java.util.function.Consumer;
  * Create a new builder to create a Neuro sdk instance
  */
 @SuppressWarnings({"unused"})
+@NotNullByDefault
 public class NeuroSDKBuilder {
 
     private final static Logger logger = LoggerFactory.getLogger(NeuroSDKBuilder.class);
@@ -29,7 +27,7 @@ public class NeuroSDKBuilder {
     private static final String DEFAULT_ADDRESS = "localhost";
     private static final short DEFAULT_PORT = 8000;
 
-    private @NotNull String gameName;
+    private String gameName;
 
     private @Nullable String address = null;
     private @Nullable Short port = null;
@@ -57,7 +55,7 @@ public class NeuroSDKBuilder {
      *                 (e.g "Buckshot Roulette").
      *                 The server will not include this field
      */
-    public NeuroSDKBuilder(@NotNull String gameName) {
+    public NeuroSDKBuilder(String gameName) {
         this.gameName = gameName;
 
         this.onConnect = handshake -> {
@@ -99,8 +97,8 @@ public class NeuroSDKBuilder {
      * @param onOpen the consumer to execute on open
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder setOnConnect(@NotNull Consumer<ServerHandshake> onOpen) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder setOnConnect(Consumer<ServerHandshake> onOpen) {
         this.onConnect = onOpen;
         return this;
     }
@@ -114,8 +112,8 @@ public class NeuroSDKBuilder {
      * @param onClose the consumer to execute on open
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder setOnClose(@NotNull Consumer<String> onClose) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder setOnClose(Consumer<String> onClose) {
         this.onClose = onClose;
         return this;
     }
@@ -127,8 +125,8 @@ public class NeuroSDKBuilder {
      * @param onError the consumer to execute on error
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder setOnError(@NotNull Consumer<Exception> onError) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder setOnError(Consumer<Exception> onError) {
         this.onError = onError;
         return this;
     }
@@ -141,8 +139,8 @@ public class NeuroSDKBuilder {
      * @param actions the list of actions to get registered
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder setActionsOnConnect(@NotNull List<Action> actions) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder setActionsOnConnect(List<Action> actions) {
         this.actionList = new ArrayList<>(actions);
         return this;
     }
@@ -155,8 +153,8 @@ public class NeuroSDKBuilder {
      * @param actions the list of actions to get registered
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder setActionsOnConnect(@NotNull Action... actions) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder setActionsOnConnect(Action... actions) {
         return setActionsOnConnect(List.of(actions));
     }
 
@@ -168,8 +166,8 @@ public class NeuroSDKBuilder {
      * @param actions the list of actions to get registered
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder addActionsOnConnect(@NotNull List<Action> actions) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder addActionsOnConnect(List<Action> actions) {
         this.actionList.addAll(actions);
         return this;
     }
@@ -182,18 +180,19 @@ public class NeuroSDKBuilder {
      * @param actions the list of actions to get registered
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder addActionsOnConnect(@NotNull Action... actions) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder addActionsOnConnect(Action... actions) {
         return addActionsOnConnect(List.of(actions));
     }
 
     /**
      * Set the webserver expected port
+     * If null reset the address to default address (see {@link DEFAULT_PORT})
      *
      * @param port the webserver port
      * @return this
      */
-    @NotNull
+    @Contract("_ -> this")
     public NeuroSDKBuilder setPort(@Nullable Short port) {
         this.port = port;
         return this;
@@ -201,22 +200,23 @@ public class NeuroSDKBuilder {
 
     /**
      * Set the expected websocket address
+     * If null reset the address to default address (see {@link DEFAULT_ADDRESS})
      *
      * @param address the websocket address
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder setAddress(String address) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder setAddress(@Nullable String address) {
         this.address = address;
         return this;
     }
 
     /**
      * Get the expected websocket address
+     * by default {@link DEFAULT_ADDRESS}
      *
      * @return the expected address
      */
-    @NotNull
     public String getAddress() {
         return address != null ? address : DEFAULT_ADDRESS;
     }
@@ -231,7 +231,8 @@ public class NeuroSDKBuilder {
     }
 
     /**
-     * Set the webserver expected port
+     * Get the webserver expected port
+     * by default {@link DEFAULT_PORT}
      *
      * @return the webserver port
      */
@@ -249,7 +250,6 @@ public class NeuroSDKBuilder {
      *
      * @return the consumer to execute on open
      */
-    @NotNull
     public Consumer<ServerHandshake> getOnConnect() {
         return onConnect;
     }
@@ -262,7 +262,6 @@ public class NeuroSDKBuilder {
      *
      * @return the consumer to execute on open
      */
-    @NotNull
     public Consumer<String> getOnClose() {
         return onClose;
     }
@@ -273,7 +272,6 @@ public class NeuroSDKBuilder {
      *
      * @return the consumer to execute on error
      */
-    @NotNull
     public Consumer<Exception> getOnError() {
         return onError;
     }
@@ -283,7 +281,7 @@ public class NeuroSDKBuilder {
      *
      * @return the list of actions
      */
-    @NotNull
+
     public List<Action> getActions() {
         return actionList;
     }
@@ -293,7 +291,7 @@ public class NeuroSDKBuilder {
      *
      * @return the game name
      */
-    public @NotNull String getGameName() {
+    public String getGameName() {
         return gameName;
     }
 
@@ -306,8 +304,8 @@ public class NeuroSDKBuilder {
      * @param gameName the game name
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder setGameName(@NotNull String gameName) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder setGameName(String gameName) {
         this.gameName = gameName;
         return this;
     }
@@ -317,7 +315,6 @@ public class NeuroSDKBuilder {
      *
      * @return the list of SDK Listeners
      */
-    @NotNull
     public List<NeuroSDKListener> getListeners() {
         return listeners;
     }
@@ -328,8 +325,8 @@ public class NeuroSDKBuilder {
      * @param listeners the list of SDK listener
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder setListeners(@NotNull List<NeuroSDKListener> listeners) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder setListeners(List<NeuroSDKListener> listeners) {
         this.listeners = new ArrayList<>(listeners);
         return this;
     }
@@ -340,8 +337,8 @@ public class NeuroSDKBuilder {
      * @param listeners the listeners to add
      * @return this
      */
-    @NotNull
-    public NeuroSDKBuilder addListeners(@NotNull NeuroSDKListener... listeners) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder addListeners(NeuroSDKListener... listeners) {
         this.listeners.addAll(List.of(listeners));
         return this;
     }
@@ -352,7 +349,6 @@ public class NeuroSDKBuilder {
      * @return set of enabled proposed features
      */
     @ApiStatus.Experimental
-    @NotNull
     public Set<ProposedFeature> getProposed() {
         return EnumSet.copyOf(proposed);
     }
@@ -364,8 +360,8 @@ public class NeuroSDKBuilder {
      * @return this
      */
     @ApiStatus.Experimental
-    @NotNull
-    public NeuroSDKBuilder addProposed(@NotNull ProposedFeature... proposed) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder addProposed(ProposedFeature... proposed) {
         this.proposed.addAll(List.of(proposed));
         return this;
     }
@@ -377,8 +373,8 @@ public class NeuroSDKBuilder {
      * @return this
      */
     @ApiStatus.Experimental
-    @NotNull
-    public NeuroSDKBuilder removeProposed(@NotNull ProposedFeature... proposed) {
+    @Contract("_ -> this")
+    public NeuroSDKBuilder removeProposed(ProposedFeature... proposed) {
         List.of(proposed).forEach(this.proposed::remove);
         return this;
     }
@@ -393,7 +389,6 @@ public class NeuroSDKBuilder {
      *
      * @return the Neuro sdk instance with websocket opening.
      */
-    @NotNull
     @NonBlocking
     public NeuroSDK build() {
         return new NeuroSDK(this);
