@@ -334,4 +334,12 @@ public interface NeuroSDKInterface {
      */
     boolean isEnable(ProposedFeature feature);
 
+    /**
+     * Get the current character playing the game.
+     * <p>
+     * If not initialized, default to {@link Character#DEFAULT}.
+     * @return The character currently playing
+     */
+    Character getCharacter();
+
 }

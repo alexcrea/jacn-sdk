@@ -1,4 +1,4 @@
-package xyz.alexcrea.jacn;
+package xyz.alexcrea.jacn.websocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,6 +16,7 @@ import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
 import xyz.alexcrea.jacn.listener.NeuroSDKListener;
+import xyz.alexcrea.jacn.sdk.Character;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 import xyz.alexcrea.jacn.sdk.NeuroSDKBuilder;
 import xyz.alexcrea.jacn.sdk.NeuroSDKState;
@@ -119,6 +120,20 @@ public class NeuroWebsocket extends WebSocketClient {
         sendResult(failed);
     }
 
+    private void executeStartup(Character character) {
+        this.parent.setCharacter(character);
+
+        // Execute on listeners
+        for (NeuroSDKListener listener : listeners) {
+            try {
+                listener.onStartup(character);
+            } catch (Exception e) {
+                logger.error("Error on startup handling: {}", character);
+            }
+        }
+
+    }
+
     private void executeActionRequest(ActionRequest request) {
         // Do Action and get result
         @Nullable ActionResult result = null;
@@ -200,6 +215,9 @@ public class NeuroWebsocket extends WebSocketClient {
 
     private void handleCommand(String message, String command, HashMap<?, ?> map) {
         switch (command) {
+            case "startup":
+                handleStartup(message, map);
+                break;
             case "action":
                 handleIngoingAction(message, map);
                 break;
@@ -212,18 +230,37 @@ public class NeuroWebsocket extends WebSocketClient {
             case "shutdown/immediate":
                 //TODO
                 break;
+            case "speech_finished":
+                //TODO IMPORTANT IS PART OF THE RELEASED SDK
+                break;
             default:
                 logger.error("Unknown incoming command: {}", command);
         }
     }
 
-    private void handleIngoingAction(String message, HashMap<?, ?> map) {
+    private @Nullable Map<?, ?> getData(String message, Map<?, ?> map) {
         Object dataObj = map.get("data");
         if (!(dataObj instanceof Map<?, ?> data)) {
             sendInvalidFeedbackUnknownID(message, "Could not find command data" +
                     "\nmessage: " + message, null);
-            return;
+            return null;
         }
+        return data;
+    }
+
+    private void handleStartup(String message, Map<?,?> map) {
+        var data = getData(message, map);
+        if(data == null) return;
+
+        var character = findCharacter(data, message);
+        if(character == null) return;
+
+        executeStartup(character);
+    }
+
+    private void handleIngoingAction(String message, HashMap<?, ?> map) {
+        var data = getData(message, map);
+        if(data == null) return;
 
         ActionRequest request = findRequest(data, message);
         if (request == null) return;
@@ -251,6 +288,34 @@ public class NeuroWebsocket extends WebSocketClient {
             logger.error(reason, e);
             close(CloseFrame.PROTOCOL_ERROR, reason);
         }
+    }
+
+    @Nullable
+    private Character findCharacter(Map<?,?> map, String message) {
+        Object sessionObj = map.get("sessionId");
+        if (sessionObj == null) {
+            sendInvalidFeedbackUnknownID(message, "Could not find the session id field on the message" +
+                    "\nmessage: " + message, null);
+            return null;
+        }
+        String session = sessionObj.toString();
+
+        Object characterObj = map.get("characterId");
+        if (characterObj == null) {
+            sendInvalidFeedbackUnknownID(message, "Could not find the session id field on the message" +
+                    "\nmessage: " + message, null);
+            return null;
+        }
+        String character = characterObj.toString();
+
+        Object nameObj = map.get("displayName");
+        if (nameObj == null) {
+            sendInvalidFeedbackUnknownID(message, "Could not find the session id field on the message" +
+                    "\nmessage: " + message, null);
+            return null;
+        }
+        String name = nameObj.toString();
+        return new Character(session, character, name);
     }
 
     @Nullable

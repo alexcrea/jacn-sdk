@@ -5,7 +5,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.alexcrea.jacn.NeuroWebsocket;
+import xyz.alexcrea.jacn.websocket.NeuroWebsocket;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.sdk.proposed.ProposedFeature;
 
@@ -24,6 +24,7 @@ public class NeuroSDK implements NeuroSDKInterface {
     private final static Logger logger = LoggerFactory.getLogger(NeuroSDK.class);
 
     private final String gameName;
+    private Character character = Character.DEFAULT;
 
     private volatile NeuroSDKState state;
     private final NeuroWebsocket websocket;
@@ -375,6 +376,14 @@ public class NeuroSDK implements NeuroSDKInterface {
         return this.enabledFeatures.contains(feature);
     }
 
+    @Override
+    public Character getCharacter() {
+        return this.character;
+    }
+
+    public void setCharacter(Character character) {
+        this.character = character;
+    }
 
     /**
      * Gracefully close the websocket

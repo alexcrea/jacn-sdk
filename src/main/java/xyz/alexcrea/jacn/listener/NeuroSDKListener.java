@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.sdk.Character;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 
 /**
@@ -25,7 +26,7 @@ public interface NeuroSDKListener {
     /**
      * Get the current Neuro sdk.
      *
-     * @return the current neuro sdk. null is not yet set.
+     * @return the current neuro sdk. null is not yet initialized.
      */
     @Nullable
     NeuroSDK getSDK();
@@ -85,5 +86,11 @@ public interface NeuroSDKListener {
      * @param sdk     the Neuro SDK
      */
     void onAfterResult(ActionRequest request, ActionResult result, NeuroSDK sdk);
+
+    /**
+     * Called when startup is triggered, this cause a change of character.
+     * @param character The character playing the game.
+     */
+    void onStartup(Character character);
 
 }

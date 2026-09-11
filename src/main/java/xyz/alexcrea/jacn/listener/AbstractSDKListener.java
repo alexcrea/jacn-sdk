@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import xyz.alexcrea.jacn.action.Action;
 import xyz.alexcrea.jacn.action.ActionRequest;
 import xyz.alexcrea.jacn.action.ActionResult;
+import xyz.alexcrea.jacn.sdk.Character;
 import xyz.alexcrea.jacn.sdk.ForceActionPriority;
 import xyz.alexcrea.jacn.sdk.NeuroSDK;
 import xyz.alexcrea.jacn.sdk.NeuroSDKInterface;
@@ -138,6 +139,11 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
         if (exception instanceof ConnectException connectException) {
             onConnectError(connectException, this.sdk);
         }
+    }
+
+    @Override
+    public void onStartup(Character character) {
+
     }
 
     @Override
@@ -276,6 +282,12 @@ public abstract class AbstractSDKListener implements NeuroSDKListener, NeuroSDKI
     public boolean isEnable(ProposedFeature feature) {
         if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
         return sdk.isEnable(feature);
+    }
+
+    @Override
+    public Character getCharacter() {
+        if (sdk == null) throw new IllegalStateException("NeuroSDK not initialized");
+        return sdk.getCharacter();
     }
 
 }

@@ -39,7 +39,7 @@ add jacn to your dependency
 <dependency>
     <groupId>xyz.alexcrea.jacn</groupId>
     <artifactId>jacn_sdk</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 It is also recommended but optional that you add jetbrain's annotation from
@@ -48,7 +48,7 @@ It is also recommended but optional that you add jetbrain's annotation from
 <dependency>
     <groupId>org.jetbrains</groupId>
     <artifactId>annotations</artifactId>
-    <version>24.0.1</version>
+    <version>26.1.0</version>
 </dependency>
 ```
 
